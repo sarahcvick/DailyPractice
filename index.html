@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Practice">
 <meta name="theme-color" content="#f9f9f7">
 <title>Daily Practice</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%232a78d6' stroke-width='4' stroke-linecap='round' stroke-dasharray='61 82' transform='rotate(-90 16 16)'/%3E%3C/svg%3E">
 <style>
 :root {
   color-scheme: light;
@@ -173,7 +174,6 @@ nav.tabs .t[aria-selected="true"] { color: var(--s1); }
 #session.discreet { background: var(--surface-1); }
 .ringwrap { position: relative; width: 232px; height: 232px; display: grid; place-items: center; }
 .ringwrap svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-#ringProg { transition: stroke .35s ease; }
 .ringtext { text-align: center; z-index: 2; }
 .ringtext .phase { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 .ringtext .count { font-size: 54px; font-weight: 300; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -181,8 +181,8 @@ nav.tabs .t[aria-selected="true"] { color: var(--s1); }
 #session.discreet .ringtext { opacity: 0; pointer-events: none; }
 #session.discreet .sessionchrome { opacity: 0.13; }
 #session.discreet #ringTrack { stroke: color-mix(in srgb, var(--grid) 45%, transparent); }
-#session.discreet #ringProg { stroke: color-mix(in srgb, var(--text-muted) 34%, transparent); }
 #session.discreet .ringwrap { transform: scale(0.62); }
+#ringProg { transition: stroke .3s ease, stroke-width .3s ease; }
 .pips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; max-width: 250px; margin-top: 26px; }
 .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--grid); transition: background .2s ease, transform .2s ease; }
 .pip.on { background: var(--s1); }
@@ -210,6 +210,15 @@ nav.tabs .t[aria-selected="true"] { color: var(--s1); }
 .stat { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
 .stat .v { font-size: 25px; font-weight: 660; letter-spacing: -0.02em; line-height: 1.15; }
 .stat .k { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; font-weight: 580; }
+.exstreak { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--grid); }
+.exstreak:last-child { border-bottom: none; padding-bottom: 0; }
+.exstreak:first-child { padding-top: 0; }
+.exstreak .swatch { width: 9px; height: 9px; border-radius: 3px; }
+.exstreak .nm { flex: 1 1 auto; font-size: 14.5px; display: flex; flex-direction: column; }
+.exstreak .goal { font-size: 11.5px; color: var(--text-muted); }
+.exstreak .cur { font-size: 22px; font-weight: 660; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.exstreak .unit { font-size: 11.5px; font-weight: 500; color: var(--text-muted); margin-left: 3px; }
+.exstreak .best { font-size: 11.5px; color: var(--text-muted); width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
 .heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 3px; overflow-x: auto; padding-bottom: 4px; }
 .cell { width: 100%; aspect-ratio: 1; min-width: 11px; border-radius: 2.5px; background: var(--heat-0); }
 .heatlabels { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
@@ -330,13 +339,15 @@ select { width: auto; text-align: left; }
   <div class="card">
     <h2>Discreet use</h2>
     <div class="tip">
-      Turn on <strong>Discreet</strong> in a session and the screen goes near-blank — a faint grey ring, no words, no colour.
-      The cue is what you feel, not what you see: one buzz to squeeze, two short buzzes to release.
-      You can put the phone face-down in your lap and just follow the buzzes.
+      Turn on <strong>Discreet</strong> in a session and the screen goes near-blank — two greys, no words, no colour.
+      Reading it at a glance:<br>
+      <strong>Squeeze</strong> — the darker, thicker ring winding <em>clockwise</em>, filling up.<br>
+      <strong>Release</strong> — a pale, thin ring unwinding back to nothing.<br>
+      Direction alone tells you the phase, so you don't have to focus on it.
     </div>
     <div class="note" style="margin-top:10px">
-      iPhone note: Safari doesn't allow web vibration. The app falls back to a soft
-      audio blip — put in one earbud and nobody hears a thing. Set your cue style in Settings.
+      iPhone note: no browser on iOS can vibrate — Apple doesn't expose it to web apps. Use the
+      soft blip with one earbud in, or go by the ring alone. Set your cue in Settings.
     </div>
   </div>
 
@@ -353,6 +364,12 @@ select { width: auto; text-align: left; }
     <div class="stat"><div class="v" id="stCurrent">0</div><div class="k">Day streak</div></div>
     <div class="stat"><div class="v" id="stBest">0</div><div class="k">Best streak</div></div>
     <div class="stat"><div class="v" id="stRate">0%</div><div class="k">30-day rate</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Streaks by exercise</h2>
+    <div id="exStreaks"></div>
+    <div class="note" style="margin-top:10px">A day counts once you hit that exercise's full target. Today won't break a streak until the day is over.</div>
   </div>
 
   <div class="card">
@@ -418,7 +435,8 @@ select { width: auto; text-align: left; }
       <div><label for="s-discreet">Start sessions discreet</label><div class="desc">Near-blank screen by default</div></div>
       <span class="switch"><input type="checkbox" id="s-discreet"><span class="track"></span><span class="knob"></span></span>
     </div>
-    <button class="sm ghost" id="btn-testcue" style="margin-top:6px">Test cue</button>
+    <div class="banner" id="cueWarn" style="margin:10px 0 0"></div>
+    <button class="sm ghost" id="btn-testcue" style="margin-top:10px">Test cue</button>
   </div>
 
   <div class="card">
@@ -430,6 +448,9 @@ select { width: auto; text-align: left; }
     <div class="field">
       <div><label>Notifications</label><div class="desc" id="notifState">not enabled</div></div>
       <button class="sm" id="btn-notif">Enable</button>
+    </div>
+    <div class="field">
+      <div><label>Works offline</label><div class="desc" id="offlineState">checking…</div></div>
     </div>
     <div class="tip" style="margin-top:10px">
       For the 3 PM nudge to reach you reliably on a phone, open this from your
@@ -583,7 +604,31 @@ function dayScore(d) {
 /* =====================================================================
    CUES — vibration and/or a soft sine blip (works on iOS with earbuds)
    ===================================================================== */
+/* iPhones do not expose vibration to web apps at all — no browser on iOS can do
+   it, so if it's missing we quietly move to the audio cue rather than leaving
+   her with silent, invisible feedback. */
+const HAS_VIBRATE = typeof navigator.vibrate === "function";
+if (!HAS_VIBRATE && !db.settings.cueChecked) {
+  if (S().cue === "vibrate" || S().cue === "both") S().cue = "sound";
+  S().cueChecked = true;
+  save();
+}
+
 let audioCtx = null;
+function unlockAudio() {
+  try {
+    // Ask iOS to treat this as media playback, so the blip still sounds with the
+    // ring/silent switch flipped to silent — which it will be, in a meeting.
+    if (navigator.audioSession) navigator.audioSession.type = "playback";
+  } catch (e) {}
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  } catch (e) {}
+}
+document.addEventListener("touchend", unlockAudio, { once: true, passive: true });
+document.addEventListener("click", unlockAudio, { once: true });
+
 function blip(freq, ms, vol) {
   const s = S();
   if (s.cue !== "sound" && s.cue !== "both") return;
@@ -602,7 +647,7 @@ function blip(freq, ms, vol) {
 }
 function buzz(pattern) {
   const s = S();
-  if ((s.cue === "vibrate" || s.cue === "both") && navigator.vibrate) {
+  if ((s.cue === "vibrate" || s.cue === "both") && HAS_VIBRATE) {
     try { navigator.vibrate(pattern); } catch (e) {}
   }
 }
@@ -749,7 +794,7 @@ function hourLabel(h) { const ampm = h >= 12 ? "PM" : "AM"; const hh = h % 12 ==
 /* =====================================================================
    KEGEL SESSION ENGINE
    ===================================================================== */
-const sess = { open: false, running: false, phase: "ready", rep: 0, total: 20, tEnd: 0, remain: 0, raf: 0, counted: 0, manual: false };
+const sess = { open: false, running: false, phase: "ready", rep: 0, total: 20, tEnd: 0, remain: 0, raf: 0, counted: 0, manual: false, lastFrac: 0 };
 const CIRC = 2 * Math.PI * 88;
 
 function openSession(total, manual) {
@@ -761,9 +806,10 @@ function openSession(total, manual) {
   $("sessMain").textContent = manual ? "Tap to count" : "Begin";
   $("sessHint").innerHTML = manual
     ? "Tap anywhere to add a rep"
-    : "One buzz = squeeze &middot; two buzzes = release";
+    : "Thick ring filling = squeeze &middot; thin ring emptying = release";
   buildPips();
-  paint(0, "var(--s1)");
+  sess.lastFrac = 0;
+  paint(0, "hold");
   $("sessPhase").textContent = manual ? "Tap" : "Ready";
   $("sessCount").textContent = manual ? "0" : S().hold;
   $("sessRep").textContent = manual ? "of " + total + " reps" : "rep 1 of " + total;
@@ -799,10 +845,26 @@ function updatePips() {
     nodes[i].className = "pip" + (i < sess.counted ? " on" : (i === sess.counted && sess.running ? " now" : ""));
   }
 }
-function paint(frac, color) {
+/* The ring carries the phase three ways at once, so a half-second glance is enough:
+   SQUEEZE — strong colour, thick stroke, winding clockwise (filling up)
+   RELEASE — pale colour, thin stroke, unwinding (draining away)
+   Both survive discreet mode, where the palette drops to two greys. */
+const PHASE_STYLE = {
+  hold:    { normal: "var(--s1)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 },
+  rest:    { normal: "var(--s3)", quiet: "color-mix(in srgb, var(--text-muted) 34%, transparent)", w: 3.5 },
+  done:    { normal: "var(--good)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 }
+};
+function paint(frac, phase) {
   const c = $("ringProg");
-  c.setAttribute("stroke-dashoffset", (CIRC * (1 - Math.min(1, Math.max(0, frac)))).toFixed(1));
-  if (color) c.setAttribute("stroke", color);
+  const quiet = $("session").classList.contains("discreet");
+  if (phase && PHASE_STYLE[phase]) {
+    const st = PHASE_STYLE[phase];
+    c.setAttribute("stroke", quiet ? st.quiet : st.normal);
+    c.setAttribute("stroke-width", st.w);
+  }
+  // release drains instead of filling — direction alone tells you the phase
+  const shown = phase === "rest" ? 1 - frac : frac;
+  c.setAttribute("stroke-dashoffset", (CIRC * (1 - Math.min(1, Math.max(0, shown)))).toFixed(1));
 }
 
 function startPhase(phase) {
@@ -810,8 +872,9 @@ function startPhase(phase) {
   sess.phase = phase;
   const dur = phase === "hold" ? s.hold : s.rest;
   sess.tEnd = performance.now() + dur * 1000;
-  if (phase === "hold") { cueSqueeze(); paint(0, "var(--s1)"); $("sessPhase").textContent = "Squeeze"; }
-  else { cueRelease(); paint(0, "var(--s3)"); $("sessPhase").textContent = "Release"; }
+  sess.lastFrac = 0;
+  if (phase === "hold") { cueSqueeze(); paint(0, "hold"); $("sessPhase").textContent = "Squeeze"; }
+  else { cueRelease(); paint(0, "rest"); $("sessPhase").textContent = "Release"; }
   $("sessRep").textContent = "rep " + Math.min(sess.total, sess.counted + 1) + " of " + sess.total;
   updatePips();
 }
@@ -823,7 +886,8 @@ function tick() {
   const dur = (sess.phase === "hold" ? s.hold : s.rest) * 1000;
   const left = sess.tEnd - now;
   const frac = 1 - Math.max(0, left) / dur;
-  paint(frac);
+  sess.lastFrac = frac;
+  paint(frac, sess.phase);
   $("sessCount").textContent = Math.max(0, Math.ceil(left / 1000));
 
   if (left <= 0) {
@@ -843,7 +907,8 @@ function finishSet() {
   sess.running = false;
   cancelAnimationFrame(sess.raf);
   cueDone();
-  paint(1, "var(--good)");
+  sess.phase = "done"; sess.lastFrac = 1;
+  paint(1, "done");
   $("sessPhase").textContent = "Set complete";
   $("sessCount").textContent = sess.counted;
   $("sessRep").textContent = "reps this set";
@@ -915,6 +980,7 @@ $("sessDiscreet").addEventListener("click", e => {
   e.stopPropagation();
   const on = $("session").classList.toggle("discreet");
   $("sessDiscreet").textContent = on ? "Show" : "Discreet";
+  paint(sess.lastFrac || 0, sess.phase === "ready" ? "hold" : sess.phase);
 });
 $("sessExit").addEventListener("click", e => { e.stopPropagation(); closeSession(); });
 $("sessFinish").addEventListener("click", e => { e.stopPropagation(); sess.running = false; cancelAnimationFrame(sess.raf); closeSession(); });
@@ -965,24 +1031,34 @@ $("yExit").addEventListener("click", () => closeYoga(false));
    HISTORY
    ===================================================================== */
 function allKeys() { return Object.keys(db.days).sort(); }
-function streaks() {
-  let cur = 0, best = 0, run = 0;
+
+/* A streak is any run of consecutive days where `test` passes.
+   Today is never counted as a break until the day is actually over — so an
+   unfinished morning doesn't wipe out three weeks of work at 9am. */
+function streakFor(test) {
+  let best = 0, run = 0;
   const start = allKeys()[0];
-  if (!start) return { cur: 0, best: 0 };
-  let d = parseKey(start);
   const end = new Date();
-  while (d <= end) {
-    const sc = dayScore(dayRO(key(d)));
-    if (sc >= 0.999) { run++; best = Math.max(best, run); } else { run = 0; }
-    d = addDays(d, 1);
+  if (start) {
+    let d = parseKey(start), guard = 0;
+    while (d <= end && guard++ < 4000) {
+      if (test(dayRO(key(d)))) { run++; best = Math.max(best, run); } else { run = 0; }
+      d = addDays(d, 1);
+    }
   }
-  // current streak counted backwards; today doesn't break it until day's end
-  let c = 0, x = new Date();
-  if (dayScore(dayRO(key(x))) < 0.999) x = addDays(x, -1);
-  while (dayScore(dayRO(key(x))) >= 0.999) { c++; x = addDays(x, -1); }
-  cur = c;
+  let cur = 0, x = new Date(), guard2 = 0;
+  if (!test(dayRO(key(x)))) x = addDays(x, -1);
+  while (test(dayRO(key(x))) && guard2++ < 4000) { cur++; x = addDays(x, -1); }
   return { cur: cur, best: Math.max(best, cur) };
 }
+
+const TESTS = {
+  all: d => dayScore(d) >= 0.999,
+  keg: d => (d.reps || 0) >= kegTarget(),
+  am: d => !!d.am,
+  pm: d => !!d.pm
+};
+function streaks() { return streakFor(TESTS.all); }
 
 function renderHistory() {
   const st = streaks();
@@ -993,9 +1069,30 @@ function renderHistory() {
   for (let i = 29; i >= 0; i--) { const k = key(addDays(new Date(), -i)); sum += dayScore(dayRO(k)); n++; }
   $("stRate").textContent = Math.round((sum / n) * 100) + "%";
 
+  renderExStreaks();
   renderHeat();
   renderTrend();
   renderTotals();
+}
+
+function renderExStreaks() {
+  const rows = [
+    { k: "keg", name: "Kegels", color: "var(--s1)", goal: kegTarget() + " reps" },
+    { k: "am", name: "Morning yoga", color: "var(--s2)", goal: S().amMin + " min" },
+    { k: "pm", name: "Evening yoga", color: "var(--s3)", goal: S().pmMin + " min" }
+  ];
+  let h = "";
+  rows.forEach(r => {
+    const s = streakFor(TESTS[r.k]);
+    const live = s.cur > 0;
+    h += '<div class="exstreak">' +
+      '<span class="swatch" style="background:' + r.color + '"></span>' +
+      '<span class="nm">' + r.name + '<span class="goal">' + r.goal + '</span></span>' +
+      '<span class="cur"' + (live ? '' : ' style="color:var(--text-muted)"') + '>' + s.cur + '<span class="unit">' + (s.cur === 1 ? "day" : "days") + '</span></span>' +
+      '<span class="best">best ' + s.best + '</span>' +
+      '</div>';
+  });
+  $("exStreaks").innerHTML = h;
 }
 
 function renderHeat() {
@@ -1204,10 +1301,18 @@ function initSettings() {
     : "History is saved on this device only — nothing leaves your phone. Export a backup now and then, or before switching phones.";
 }
 function updateCueDesc() {
-  const has = !!navigator.vibrate;
-  $("cueDesc").textContent = has
-    ? "Vibration is supported here"
-    : "No vibration on this browser — use the blip with earbuds";
+  $("cueDesc").textContent = HAS_VIBRATE
+    ? "Vibration works on this phone"
+    : "This phone can't vibrate from a web app";
+  const w = $("cueWarn"), usingVib = S().cue === "vibrate" || S().cue === "both";
+  if (!HAS_VIBRATE && usingVib) {
+    w.classList.add("show");
+    w.innerHTML = "<strong>Vibration won't fire on this phone.</strong> iPhones don't give web apps access to the vibration motor — no browser can do it. Choose the soft blip and wear one earbud instead.";
+  } else if (!HAS_VIBRATE && S().cue === "sound") {
+    w.classList.remove("show");
+  } else {
+    w.classList.remove("show");
+  }
 }
 function updateNotifState() {
   const el = $("notifState"), b = $("btn-notif");
@@ -1289,6 +1394,21 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden) { renderToday(); renderHistory(); }
 });
 window.addEventListener("resize", () => { if ($("view-history").classList.contains("active")) renderTrend(); });
+
+/* Offline: cache the app on the phone so it opens with no signal.
+   Needs sw.js sitting next to index.html, and an https address (file:// can't). */
+function setOfflineState(txt) { const el = $("offlineState"); if (el) el.textContent = txt; }
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  navigator.serviceWorker.register("sw.js")
+    .then(reg => {
+      setOfflineState(navigator.serviceWorker.controller ? "yes — saved on this phone" : "saving… reopen once to finish");
+      reg.addEventListener("updatefound", () => setOfflineState("updating…"));
+    })
+    .catch(() => setOfflineState("unavailable — sw.js not found next to the app"));
+  navigator.serviceWorker.addEventListener("controllerchange", () => setOfflineState("yes — saved on this phone"));
+} else {
+  setOfflineState(location.protocol.indexOf("http") === 0 ? "not supported by this browser" : "needs a web address (https)");
+}
 
 applyTheme();
 initSettings();
