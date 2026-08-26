@@ -1,7 +1,7 @@
 /* Daily Practice — offline cache.
    Keeps the whole app on the phone so it opens with no signal at all.
    Bump CACHE when index.html changes so the new version is picked up. */
-const CACHE = "daily-practice-v2";
+const CACHE = "daily-practice-v3";
 const SHELL = ["./", "./index.html"];
 
 self.addEventListener("install", e => {
