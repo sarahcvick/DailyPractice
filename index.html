@@ -24,6 +24,8 @@
   --s1: #2a78d6;   /* PPT reps */
   --s2: #eb6834;   /* morning yoga */
   --s3: #1baf7a;   /* evening yoga */
+  --s4: #eda100;   /* exercises */
+  --s5: #e87ba4;   /* stretches */
   --good: #0ca30c;
   --warning: #fab219;
   --success-text: #006300;
@@ -50,6 +52,8 @@
     --s1: #3987e5;
     --s2: #d95926;
     --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
     --success-text: #0ca30c;
     --heat-0: #232322;
     --heat-1: #184f95;
@@ -73,6 +77,8 @@
   --s1: #3987e5;
   --s2: #d95926;
   --s3: #199e70;
+  --s4: #c98500;
+  --s5: #d55181;
   --success-text: #0ca30c;
   --heat-0: #232322;
   --heat-1: #184f95;
@@ -274,6 +280,41 @@ select { width: auto; text-align: left; }
 .chartwrap { position: relative; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(80px + env(safe-area-inset-bottom)); background: var(--text-primary); color: var(--plane); padding: 10px 16px; border-radius: 99px; font-size: 13.5px; font-weight: 560; opacity: 0; transition: opacity .2s; z-index: 200; pointer-events: none; max-width: 86%; text-align: center; }
 .toast.show { opacity: 0.95; }
+
+/* ---------- routine (exercises + stretches) ---------- */
+.rxhead { display: flex; align-items: center; gap: 14px; padding: 2px 0 10px; }
+.rxhead .title { font-weight: 640; font-size: 16px; letter-spacing: -0.01em; }
+.rxhead .meta { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+.pick { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--grid); }
+.pick .pdial { position: relative; flex: 0 0 30px; width: 30px; height: 30px; }
+.pick .pdial svg { display: block; transform: rotate(-90deg); }
+.pick .pdial .mark { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--success-text); }
+.pick .body { flex: 1 1 auto; min-width: 0; }
+.pick .title { font-weight: 600; font-size: 15px; letter-spacing: -0.005em; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pick .meta { font-size: 13px; color: var(--text-secondary); margin-top: 1px; font-variant-numeric: tabular-nums; }
+.pick .cue { font-size: 12.5px; color: var(--text-muted); margin-top: 1px; line-height: 1.4; }
+.pick .acts { flex: 0 0 auto; display: flex; align-items: center; gap: 2px; }
+.pick button.act { min-width: 68px; }
+.pick button.swap { padding: 8px 9px; font-size: 17px; line-height: 1; color: var(--text-muted); }
+.tag { font-size: 10.5px; font-weight: 640; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+.subhead { font-size: 12.5px; color: var(--text-muted); margin: -4px 0 6px; }
+#yogaTimer .ysub { min-height: 22px; font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
+#yogaTimer .ytime.lead { color: var(--text-muted); }
+
+/* ---------- routine editor (settings) ---------- */
+.ed { border-bottom: 1px solid var(--grid); }
+.ed:last-child { border-bottom: none; }
+.edhead { width: 100%; display: flex; align-items: center; gap: 10px; background: none; border: none; border-radius: 0; padding: 11px 0; text-align: left; font-weight: 500; }
+.edhead:active { transform: none; }
+.edhead .nm { flex: 1 1 auto; min-width: 0; font-size: 14.5px; }
+.edhead .sp { font-size: 12.5px; color: var(--text-muted); white-space: nowrap; }
+.edhead .chev { font-size: 12.5px; color: var(--s1); font-weight: 600; min-width: 34px; text-align: right; }
+.edform { padding: 0 0 12px; }
+.edform .field { padding: 8px 0; border-bottom: none; }
+.edform .tools { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+input[type=text] { font: inherit; font-size: 15px; padding: 7px 9px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); width: 100%; min-width: 0; }
+.edform .field.stack { flex-direction: column; align-items: stretch; gap: 5px; }
+button.danger { color: #d03b3b; }
 </style>
 </head>
 <body>
@@ -315,14 +356,6 @@ select { width: auto; text-align: left; }
       <div class="check"><button class="sm" id="btn-am">Start</button></div>
     </div>
     <div class="ex">
-      <div class="dial" id="dial-keg"></div>
-      <div class="body">
-        <div class="title">PPT Reps</div>
-        <div class="meta" id="meta-keg">0 of 60 reps</div>
-      </div>
-      <div class="check"><button class="sm primary" id="btn-keg">Session</button></div>
-    </div>
-    <div class="ex">
       <div class="dial" id="dial-pm"></div>
       <div class="body">
         <div class="title">Evening yoga</div>
@@ -330,6 +363,30 @@ select { width: auto; text-align: left; }
       </div>
       <div class="check"><button class="sm" id="btn-pm">Start</button></div>
     </div>
+    <div class="ex">
+      <div class="dial" id="dial-keg"></div>
+      <div class="body">
+        <div class="title">PPT Reps</div>
+        <div class="meta" id="meta-keg">0 of 3 sets this week</div>
+      </div>
+      <div class="check"><button class="sm primary" id="btn-keg">Session</button></div>
+    </div>
+  </div>
+
+  <div class="card" id="card-ex">
+    <div class="rxhead">
+      <div class="dial" id="dial-ex"></div>
+      <div class="body"><div class="title">Exercises</div><div class="meta" id="meta-ex"></div></div>
+    </div>
+    <div id="picks-ex" data-scope="view"></div>
+  </div>
+
+  <div class="card" id="card-st">
+    <div class="rxhead">
+      <div class="dial" id="dial-st"></div>
+      <div class="body"><div class="title">Stretches</div><div class="meta" id="meta-st"></div></div>
+    </div>
+    <div id="picks-st" data-scope="view"></div>
   </div>
 
   <div class="card">
@@ -350,12 +407,25 @@ select { width: auto; text-align: left; }
   </div>
 </section>
 
-<!-- ============ PPT REPS ============ -->
-<section class="view" id="view-kegels">
+<!-- ============ ROUTINE ============ -->
+<section class="view" id="view-routine">
   <div class="card">
+    <h2>Exercises</h2>
+    <div class="subhead" id="sub-ex"></div>
+    <div id="list-ex" data-scope="today"></div>
+  </div>
+
+  <div class="card">
+    <h2>Stretches</h2>
+    <div class="subhead" id="sub-st"></div>
+    <div id="list-st" data-scope="today"></div>
+  </div>
+
+  <div class="card">
+    <h2>PPT Reps</h2>
     <div class="hero">
-      <div class="big" id="kegBig">0<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / 60</span></div>
-      <div class="sub" id="kegSub">reps today</div>
+      <div class="big" id="kegBig">0<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / 3</span></div>
+      <div class="sub" id="kegSub">sets this week</div>
     </div>
     <button class="primary full" id="btn-start-session" style="margin-top:14px">Start a set</button>
     <div class="row" style="gap:8px; margin-top:8px">
@@ -382,7 +452,7 @@ select { width: auto; text-align: left; }
   <div class="card">
     <h2>Your protocol</h2>
     <div class="sec" id="protocolText"></div>
-    <div class="note" style="margin-top:8px">Sets can be spread through the day — the counter adds them up.</div>
+    <div class="note" style="margin-top:8px">Do them any day — the count adds up across the week (Monday to Sunday).</div>
   </div>
 </section>
 
@@ -397,7 +467,7 @@ select { width: auto; text-align: left; }
   <div class="card">
     <h2>Streaks by exercise</h2>
     <div id="exStreaks"></div>
-    <div class="note" style="margin-top:10px">A day counts once you hit that exercise's full target. Today won't break a streak until the day is over.</div>
+    <div class="note" style="margin-top:10px" id="streakNote"></div>
   </div>
 
   <div class="card">
@@ -419,12 +489,14 @@ select { width: auto; text-align: left; }
   <div class="card">
     <h2>7-day rolling completion</h2>
     <div class="legend">
-      <span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT Reps</span>
       <span class="li"><span class="swatch" style="background:var(--s2)"></span>Morning yoga</span>
       <span class="li"><span class="swatch" style="background:var(--s3)"></span>Evening yoga</span>
+      <span class="li"><span class="swatch" style="background:var(--s4)"></span>Exercises</span>
+      <span class="li"><span class="swatch" style="background:var(--s5)"></span>Stretches</span>
+      <span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT Reps (per week)</span>
     </div>
     <div class="chartwrap">
-      <svg id="trend" role="img" aria-label="Rolling 7-day completion rate for PPT reps, morning yoga and evening yoga"></svg>
+      <svg id="trend" role="img" aria-label="Rolling 7-day completion rate for morning yoga, evening yoga, exercises, stretches and PPT reps"></svg>
       <div class="tooltip" id="tt"></div>
     </div>
     <button class="sm ghost" id="btn-table" style="margin-top:8px">Show data table</button>
@@ -440,10 +512,34 @@ select { width: auto; text-align: left; }
 <!-- ============ SETTINGS ============ -->
 <section class="view" id="view-settings">
   <div class="card">
-    <h2>Targets</h2>
+    <h2>Yoga</h2>
     <div class="field"><div><label for="s-am">Morning yoga</label><div class="desc">minutes</div></div><input type="number" id="s-am" min="1" max="120"></div>
     <div class="field"><div><label for="s-pm">Evening yoga</label><div class="desc">minutes</div></div><input type="number" id="s-pm" min="1" max="120"></div>
-    <div class="field"><div><label for="s-sets">PPT sets / day</label></div><input type="number" id="s-sets" min="1" max="10"></div>
+  </div>
+
+  <div class="card">
+    <h2>Daily picks</h2>
+    <div class="field"><div><label for="s-expicks">Exercises suggested</label><div class="desc">per day</div></div><input type="number" id="s-expicks" min="1" max="8"></div>
+    <div class="field"><div><label for="s-stpicks">Stretches suggested</label><div class="desc">per day</div></div><input type="number" id="s-stpicks" min="1" max="8"></div>
+    <div class="field"><div><label for="s-doneat">Day counts as done at</label><div class="desc">exercises or stretches each</div></div><input type="number" id="s-doneat" min="1" max="8"></div>
+    <div class="note" style="margin-top:6px">Picks rotate: whatever you've gone longest without doing comes up next.</div>
+  </div>
+
+  <div class="card">
+    <h2>Exercises</h2>
+    <div id="edit-ex"></div>
+    <button class="sm" data-add="ex" style="margin-top:8px">+ Add exercise</button>
+  </div>
+
+  <div class="card">
+    <h2>Stretches</h2>
+    <div id="edit-st"></div>
+    <button class="sm" data-add="st" style="margin-top:8px">+ Add stretch</button>
+  </div>
+
+  <div class="card">
+    <h2>PPT Reps</h2>
+    <div class="field"><div><label for="s-wsets">Sets per week</label><div class="desc">Monday to Sunday</div></div><input type="number" id="s-wsets" min="1" max="30"></div>
     <div class="field"><div><label for="s-reps">Reps per set</label></div><input type="number" id="s-reps" min="1" max="60"></div>
     <div class="field"><div><label for="s-hold">Hold</label><div class="desc">seconds</div></div><input type="number" id="s-hold" min="1" max="30"></div>
     <div class="field"><div><label for="s-rest">Rest between reps</label><div class="desc">seconds</div></div><input type="number" id="s-rest" min="1" max="60"></div>
@@ -511,8 +607,8 @@ select { width: auto; text-align: left; }
 <nav class="tabs" role="tablist">
   <button class="t" role="tab" aria-selected="true" data-view="today">
     <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg>Today</button>
-  <button class="t" role="tab" aria-selected="false" data-view="kegels">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>PPT Reps</button>
+  <button class="t" role="tab" aria-selected="false" data-view="routine">
+    <svg viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="17.5" r="1.2"/></svg>Routine</button>
   <button class="t" role="tab" aria-selected="false" data-view="history">
     <svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 15l3.5-4.5L15 14l4-6"/></svg>History</button>
   <button class="t" role="tab" aria-selected="false" data-view="settings">
@@ -552,6 +648,7 @@ select { width: auto; text-align: left; }
 <div id="yogaTimer">
   <div class="ylabel" id="yLabel">Morning yoga</div>
   <div class="ytime" id="yTime">5:00</div>
+  <div class="ysub" id="ySub"></div>
   <div class="row" style="gap:10px; margin-top:28px">
     <button class="primary" id="yMain" style="min-width:130px">Start</button>
     <button class="ghost" id="yDone">Mark done</button>
@@ -584,23 +681,64 @@ function saveRaw(obj) {
   catch (e) { memoryOnly = true; }
 }
 
+/* Your PT's program. Edit any of it in Settings — this is only the starting list.
+   type "reps": sets × reps.  type "time": sets × secs, with an optional "Get set" lead-in.
+   side: true means each side (timed items run once per side). */
+const ROUTINE_DEFAULT = {
+  ex: [
+    { id: "ex1", name: "TA Activation",              type: "reps", sets: 3, reps: 10, secs: 30, side: false, note: "" },
+    { id: "ex2", name: "TA Activation on all fours", type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "" },
+    { id: "ex3", name: "Marches",                    type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "Activate, flatten back to the ground, lower legs one at a time" },
+    { id: "ex4", name: "Crunches",                   type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "" },
+    { id: "ex5", name: "Sit Ups",                    type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "" },
+    { id: "ex6", name: "Bridge Matrix",              type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "Needs your gear" },
+    { id: "ex7", name: "Bird Dog",                   type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "" },
+    { id: "ex8", name: "Hip Matrix",                 type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "Forward, back, side to side, circle, rotate" }
+  ],
+  st: [
+    { id: "st1", name: "SL Breathing",               type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "Breathe into a side twist, knees bent" },
+    { id: "st2", name: "Sacral Rocking",             type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "Like cat-cow, lower back only" },
+    { id: "st3", name: "Rockbacks",                  type: "reps", sets: 2, reps: 10, secs: 30, side: false, note: "Exhale into a knees-out child's pose" },
+    { id: "st4", name: "Active Adductor Stretch",    type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "Like rockbacks, one leg out to the side" },
+    { id: "st5", name: "Sacral Smash",               type: "time", sets: 1, reps: 10, secs: 60, side: false, note: "On the roller" },
+    { id: "st6", name: "TFL roll-out on the wall",   type: "time", sets: 1, reps: 10, secs: 30, side: false, note: "Slightly behind the hip" },
+    { id: "st7", name: "QL roll-out on the wall",    type: "time", sets: 1, reps: 10, secs: 30, side: false, note: "Between rib cage and hips" }
+  ]
+};
+
 const DEFAULTS = {
-  version: 1,
+  version: 2,
   settings: {
     amMin: 5, pmMin: 10,
-    sets: 3, reps: 20, hold: 10, rest: 10,
+    sets: 3,            // old daily PPT target — kept only to score days before the routine started
+    pptWeekSets: 3, reps: 20, hold: 10, rest: 10,
+    exPicks: 3, stPicks: 3, doneAt: 2,
+    routine: ROUTINE_DEFAULT,
     cue: "vibrate", discreetDefault: false,
     remindHour: 15, theme: "auto"
   },
   days: {},
+  routineSince: "",     // first day of the routine; earlier days keep their original scoring
   lastNotified: ""
 };
+const fresh = o => JSON.parse(JSON.stringify(o));
 
-let db = Object.assign({}, DEFAULTS, loadRaw() || {});
-db.settings = Object.assign({}, DEFAULTS.settings, db.settings || {});
-db.days = db.days || {};
+/* Fill in anything missing without touching what's there. Used on load and on import. */
+function normalize(obj) {
+  const out = Object.assign(fresh(DEFAULTS), obj || {});
+  out.settings = Object.assign(fresh(DEFAULTS.settings), (obj && obj.settings) || {});
+  const r = out.settings.routine;
+  if (!r || !Array.isArray(r.ex) || !Array.isArray(r.st)) out.settings.routine = fresh(ROUTINE_DEFAULT);
+  out.days = out.days || {};
+  if (!out.routineSince) out.routineSince = todayKey();
+  out.version = 2;
+  return out;
+}
+
+let db = normalize(loadRaw());
 
 function save() { saveRaw(db); }
+save();   // records routineSince the first time this version runs
 const S = () => db.settings;
 
 /* ---------- dates ---------- */
@@ -620,14 +758,77 @@ function day(k) {
   if (!db.days[k]) db.days[k] = { am: false, pm: false, reps: 0, amSec: 0, pmSec: 0, log: [] };
   const d = db.days[k];
   if (!d.log) d.log = [];
+  if (!d.rx) d.rx = {};
   return d;
 }
 function dayRO(k) { return db.days[k] || { am: false, pm: false, reps: 0, amSec: 0, pmSec: 0, log: [] }; }
 
+/* ---------- old scoring (days before the routine started) ---------- */
 function kegTarget() { return S().sets * S().reps; }
-function dayScore(d) {
-  const k = Math.min(1, (d.reps || 0) / Math.max(1, kegTarget()));
-  return (k + (d.am ? 1 : 0) + (d.pm ? 1 : 0)) / 3;
+function isLegacy(k) { return k < db.routineSince; }
+
+/* ---------- routine items ----------
+   A day's routine lives in d.rx: { itemId: { s: setsDone, of: setsNeeded, c: "ex"|"st" } }.
+   "of" is copied in when logged, so editing an item later never rewrites past days. */
+const CATS = ["ex", "st"];
+const CAT_NAME = { ex: "Exercises", st: "Stretches" };
+const CAT_ONE = { ex: "exercise", st: "stretch" };
+const CAT_COLOR = { ex: "var(--s4)", st: "var(--s5)" };
+function items(c) { return S().routine[c]; }
+function itemById(c, id) { return items(c).find(it => it.id === id) || null; }
+function rxOf(d, id) { return (d.rx && d.rx[id]) || null; }
+function isDone(e) { return !!e && e.s > 0 && e.s >= e.of; }
+function doneCount(d, c) {
+  let n = 0;
+  if (d.rx) for (const id in d.rx) { const e = d.rx[id]; if (e.c === c && isDone(e)) n++; }
+  return n;
+}
+function catFrac(d, c) { return Math.min(1, doneCount(d, c) / Math.max(1, S().doneAt)); }
+
+/* ---------- PPT reps: weekly, Monday–Sunday ---------- */
+function weekStart(dt) { const x = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()); return addDays(x, -((x.getDay() + 6) % 7)); }
+function weekReps(ws) { let r = 0; for (let i = 0; i < 7; i++) r += dayRO(key(addDays(ws, i))).reps || 0; return r; }
+function pptWeekTarget() { return Math.max(1, S().pptWeekSets * S().reps); }
+function setsFromReps(r) { return Math.floor((r || 0) / Math.max(1, S().reps)); }
+
+/* How complete a day was. Days before the routine started keep the original
+   formula (PPT + both yogas), so the calendar and totals don't change for them. */
+function dayScore(d, k) {
+  if (isLegacy(k)) {
+    const kg = Math.min(1, (d.reps || 0) / Math.max(1, kegTarget()));
+    return (kg + (d.am ? 1 : 0) + (d.pm ? 1 : 0)) / 3;
+  }
+  const cf = c => items(c).length ? catFrac(d, c) : 1;   // an emptied list can't hold a day back
+  return ((d.am ? 1 : 0) + (d.pm ? 1 : 0) + cf("ex") + cf("st")) / 4;
+}
+
+/* ---------- rotation ----------
+   Order = longest since last completed first; never-done first of all; ties keep list order.
+   Only days BEFORE k count, so a day's picks don't shuffle while you work through them. */
+function lastDoneMap(beforeK) {
+  const m = {};
+  const ks = allKeys();
+  for (let i = 0; i < ks.length; i++) {
+    const k = ks[i];
+    if (k >= beforeK) break;
+    const rx = db.days[k].rx;
+    if (rx) for (const id in rx) if (isDone(rx[id])) m[id] = k;
+  }
+  return m;
+}
+function rotation(c, k) {
+  const m = lastDoneMap(k);
+  return items(c)
+    .map((it, i) => ({ it: it, i: i, last: m[it.id] || "" }))
+    .sort((a, b) => a.last === b.last ? a.i - b.i : (a.last < b.last ? -1 : 1));
+}
+function picksFor(c, k) {
+  const d = dayRO(k), skip = (d.skip && d.skip[c]) || [];
+  const order = rotation(c, k).filter(o => skip.indexOf(o.it.id) < 0);
+  const n = c === "ex" ? S().exPicks : S().stPicks;
+  const picks = order.slice(0, n).map(o => o.it);
+  const extras = items(c).filter(it => { const e = rxOf(d, it.id); return e && e.s > 0 && picks.indexOf(it) < 0; });
+  return { picks: picks, extras: extras, spare: order.length > n };
 }
 
 /* =====================================================================
@@ -728,7 +929,28 @@ function fmtTime(sec) {
   sec = Math.max(0, Math.round(sec));
   return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
 }
-function renderAll() { renderToday(); renderHistory(); }
+function miniDial(frac, color) {
+  const r = 12, c = 2 * Math.PI * r, off = c * (1 - Math.min(1, frac));
+  return '<svg viewBox="0 0 30 30" width="30" height="30">' +
+      '<circle cx="15" cy="15" r="' + r + '" fill="none" stroke="var(--grid)" stroke-width="3"/>' +
+      (frac > 0 ? '<circle cx="15" cy="15" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/>' : '') +
+    '</svg>' + (frac >= 1 ? '<div class="mark">&#10003;</div>' : '');
+}
+function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]); }
+function fmtSecs(s) { s = Math.round(s); return s >= 60 && s % 60 === 0 ? (s / 60) + " min" : (s > 60 ? fmtTime(s) : s + " sec"); }
+/* "2 × 10", "10 reps", "1 min", "2 × 30 sec", "… each side" */
+function spec(it) {
+  const amt = it.type === "time" ? fmtSecs(it.secs) : (it.sets > 1 ? String(it.reps) : it.reps + " reps");
+  return (it.sets > 1 ? it.sets + " × " : "") + amt + (it.side ? " each side" : "");
+}
+function relDay(k) {
+  const back = Math.round((parseKey(todayKey()) - parseKey(k)) / 86400000);
+  if (back === 0) return "today";
+  if (back === 1) return "yesterday";
+  if (back < 7) return parseKey(k).toLocaleDateString(undefined, { weekday: "short" });
+  return parseKey(k).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+function renderAll() { renderToday(); renderRoutine(); renderHistory(); }
 
 /* =====================================================================
    TODAY VIEW (or whichever day is selected)
@@ -756,15 +978,18 @@ function renderToday() {
 
   const amF = d.am ? 1 : Math.min(0.99, (d.amSec || 0) / (s.amMin * 60));
   const pmF = d.pm ? 1 : Math.min(0.99, (d.pmSec || 0) / (s.pmMin * 60));
-  const kgF = Math.min(1, (d.reps || 0) / kegTarget());
-
   dial($("dial-am"), amF, "var(--s2)", "");
-  dial($("dial-keg"), kgF, "var(--s1)", (d.reps || 0) > 0 ? String(d.reps) : "");
   dial($("dial-pm"), pmF, "var(--s3)", "");
-
   $("meta-am").textContent = d.am ? "done" : s.amMin + " min";
   $("meta-pm").textContent = d.pm ? "done" : s.pmMin + " min";
-  $("meta-keg").textContent = (d.reps || 0) + " of " + kegTarget() + " reps";
+
+  /* PPT reps — the week containing the day on screen */
+  const ws = weekStart(parseKey(k)), sameWeek = +ws === +weekStart(new Date());
+  const wr = weekReps(ws), wSets = setsFromReps(wr);
+  dial($("dial-keg"), Math.min(1, wr / pptWeekTarget()), "var(--s1)", wSets > 0 ? String(wSets) : "");
+  $("meta-keg").textContent = wSets >= s.pptWeekSets
+    ? "Done for " + (sameWeek ? "this week" : "that week") + " · " + wSets + " set" + (wSets === 1 ? "" : "s")
+    : wSets + " of " + s.pptWeekSets + " sets " + (sameWeek ? "this week" : "that week");
 
   const bAm = $("btn-am"), bPm = $("btn-pm"), bK = $("btn-keg");
   bAm.textContent = d.am ? "Done" : (past ? "Mark" : "Start");
@@ -774,36 +999,111 @@ function renderToday() {
   bK.textContent = past ? "+" + s.reps : "Session";
   bK.className = "sm primary";
 
-  const pct = Math.round(dayScore(d) * 100);
+  /* exercises + stretches — hidden for days before the routine started */
+  const legacy = isLegacy(k);
+  CATS.forEach(c => {
+    $("card-" + c).style.display = legacy ? "none" : "";
+    if (!legacy) renderPickCard(c, k, past);
+  });
+
+  const pct = Math.round(dayScore(d, k) * 100);
   $("heroPct").textContent = pct + "%";
   $("heroSub").textContent = past
     ? "of " + dayLabelText().toLowerCase() + "'s practice"
     : (pct === 100 ? "all done — nice work" : "of today's practice");
 
-  const td = dayRO(todayKey());
-  $("kegBig").innerHTML = (td.reps || 0) + '<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / ' + kegTarget() + '</span>';
-  $("kegSub").textContent = "reps today · " + Math.floor((td.reps || 0) / s.reps) + " of " + s.sets + " sets done";
-  $("protocolText").textContent = s.sets + " sets of " + s.reps + " reps · " + s.hold + "s hold, " + s.rest + "s rest · " + s.amMin + " min yoga in the morning, " + s.pmMin + " min in the evening.";
-
   renderWeek();
   checkReminder();
+}
+
+/* The card on Today: header dial counts completed items against "done at",
+   then the day's picks, then anything extra you did. */
+function renderPickCard(c, k, past) {
+  const d = dayRO(k), P = picksFor(c, k), n = doneCount(d, c), tgt = S().doneAt;
+  dial($("dial-" + c), Math.min(1, n / tgt), CAT_COLOR[c], n > 0 ? String(n) : "");
+  const left = P.picks.filter(it => !isDone(rxOf(d, it.id))).length;
+  let meta;
+  if (n < tgt) meta = "Do " + tgt + " of these · " + n + " done";
+  else if (left > 0) meta = "Done for " + (past ? "the day" : "today") + " · " + (left === 1 ? "the last one's" : "the rest are") + " a bonus";
+  else meta = "All done" + (n > tgt ? " · " + n + " " + CAT_NAME[c].toLowerCase() : "");
+  $("meta-" + c).textContent = meta;
+
+  let h = "";
+  P.picks.forEach(it => { h += pickRow(c, it, d, { past: past, swap: P.spare }); });
+  P.extras.forEach(it => { h += pickRow(c, it, d, { past: past, tag: "Extra" }); });
+  if (!P.picks.length && !P.extras.length) h = '<div class="muted" style="padding:6px 0">Nothing in this list — add some in Settings.</div>';
+  $("picks-" + c).innerHTML = h;
+}
+
+/* One exercise/stretch row. opts: past, swap (offer swap), tag, last (rotation info) */
+function pickRow(c, it, d, opts) {
+  const e = rxOf(d, it.id), sDone = e ? e.s : 0, of = e ? e.of : it.sets, done = isDone(e);
+  let meta = esc(spec(it));
+  if (!done && sDone > 0) meta += " · set " + sDone + " of " + of + " done";
+  if (opts.last !== undefined) meta += ' · <span style="color:var(--text-muted)">' + (done || sDone ? "today" : (opts.last ? "last " + relDay(opts.last) : "not done yet")) + "</span>";
+  let btn, cls = "sm act";
+  if (done) { btn = "Done"; cls += " done"; }
+  else if (it.type === "time") { btn = opts.past ? "Mark" : "Start"; }
+  else { btn = "+ Set"; }
+  return '<div class="pick" data-c="' + c + '" data-id="' + esc(it.id) + '">' +
+    '<div class="pdial">' + miniDial(of ? sDone / of : 0, CAT_COLOR[c]) + '</div>' +
+    '<div class="body">' +
+      '<div class="title">' + esc(it.name) + (opts.tag ? ' <span class="tag">' + opts.tag + '</span>' : '') + '</div>' +
+      '<div class="meta">' + meta + '</div>' +
+      (it.note ? '<div class="cue">' + esc(it.note) + '</div>' : '') +
+    '</div>' +
+    '<div class="acts">' +
+      (opts.swap && sDone === 0 ? '<button class="iconbtn swap" data-act="swap" aria-label="Swap ' + esc(it.name) + ' for the next one">&#8635;</button>' : '') +
+      '<button class="' + cls + '" data-act="log">' + btn + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ---------- Routine tab: full lists in rotation order (always today) ---------- */
+function renderRoutine() {
+  const k = todayKey(), d = dayRO(k), s = S();
+  CATS.forEach(c => {
+    const P = picksFor(c, k), order = rotation(c, k);
+    const n = doneCount(d, c);
+    $("sub-" + c).textContent = items(c).length
+      ? "Up next at the top. " + n + " done today" + (n >= s.doneAt ? " ✓" : " · aim for " + s.doneAt) + "."
+      : "";
+    let h = "";
+    order.forEach(o => {
+      const isPick = P.picks.indexOf(o.it) >= 0;
+      h += pickRow(c, o.it, d, { past: false, tag: isPick ? "Today" : "", last: o.last });
+    });
+    if (!order.length) h = '<div class="muted">Nothing here yet — add some in Settings.</div>';
+    $("list-" + c).innerHTML = h;
+  });
+
+  const wr = weekReps(weekStart(new Date())), wSets = setsFromReps(wr), td = dayRO(k);
+  $("kegBig").innerHTML = wSets + '<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / ' + s.pptWeekSets + '</span>';
+  $("kegSub").textContent = "sets this week · " + (td.reps || 0) + " reps today";
+  $("protocolText").textContent = s.pptWeekSets + " sets a week · " + s.reps + " reps per set · " + s.hold + "s hold, " + s.rest + "s rest.";
 }
 
 function renderWeek() {
   let h = '<div class="weekgrid">';
   for (let i = 6; i >= 0; i--) {
-    const dt = addDays(new Date(), -i), d = dayRO(key(dt));
-    const kf = Math.min(1, (d.reps || 0) / kegTarget());
+    const dt = addDays(new Date(), -i), k = key(dt), d = dayRO(k), legacy = isLegacy(k);
+    const kf = legacy ? Math.min(1, (d.reps || 0) / kegTarget()) : Math.min(1, (d.reps || 0) / Math.max(1, S().reps));
     h += '<button class="weekcol" data-offset="' + i + '" aria-current="' + (i === viewOffset) + '">' +
       '<span class="wd">' + dt.toLocaleDateString(undefined, { weekday: "narrow" }) + '</span>' +
-      seg(kf, "var(--s1)") + seg(d.am ? 1 : 0, "var(--s2)") + seg(d.pm ? 1 : 0, "var(--s3)") +
+      seg(d.am ? 1 : 0, "var(--s2)") +
+      seg(legacy ? 0 : catFrac(d, "ex"), "var(--s4)") +
+      seg(legacy ? 0 : catFrac(d, "st"), "var(--s5)") +
+      seg(d.pm ? 1 : 0, "var(--s3)") +
+      seg(kf, "var(--s1)") +
       '</button>';
   }
   h += "</div>";
   h += '<div class="legend" style="margin-top:12px;margin-bottom:0">' +
-    '<span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT</span>' +
     '<span class="li"><span class="swatch" style="background:var(--s2)"></span>AM yoga</span>' +
-    '<span class="li"><span class="swatch" style="background:var(--s3)"></span>PM yoga</span></div>';
+    '<span class="li"><span class="swatch" style="background:var(--s4)"></span>Exercises</span>' +
+    '<span class="li"><span class="swatch" style="background:var(--s5)"></span>Stretches</span>' +
+    '<span class="li"><span class="swatch" style="background:var(--s3)"></span>PM yoga</span>' +
+    '<span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT set</span></div>';
   $("week").innerHTML = h;
 }
 function seg(frac, color) {
@@ -816,22 +1116,33 @@ function seg(frac, color) {
    REMINDER — always about TODAY, whatever day is on screen
    ===================================================================== */
 function incompleteParts() {
-  const d = dayRO(todayKey()), out = [];
+  const k = todayKey(), d = dayRO(k), out = [], s = S();
   if (!d.am) out.push("morning yoga");
-  if ((d.reps || 0) <= 0) out.push("PPT reps");
+  if (!isLegacy(k)) {
+    CATS.forEach(c => { const n = doneCount(d, c); if (n < s.doneAt && items(c).length) out.push((s.doneAt - n) + " more " + (s.doneAt - n === 1 ? CAT_ONE[c] : CAT_NAME[c].toLowerCase())); });
+  }
   if (!d.pm) out.push("evening yoga");
+  /* PPT only when you'd need a set every remaining day of the week to make it */
+  const now = new Date(), setsLeft = s.pptWeekSets - setsFromReps(weekReps(weekStart(now)));
+  const daysLeft = 7 - ((now.getDay() + 6) % 7);
+  if (setsLeft > 0 && daysLeft <= setsLeft) out.push("PPT reps (" + setsLeft + " set" + (setsLeft === 1 ? "" : "s") + " left this week)");
   return out;
+}
+function anythingLogged(d) {
+  if (d.am || d.pm || (d.reps || 0) > 0) return true;
+  if (d.rx) for (const id in d.rx) if (d.rx[id].s > 0) return true;
+  return false;
 }
 function checkReminder() {
   const now = new Date(), s = S(), b = $("banner");
   const d = dayRO(todayKey());
-  const nothingYet = !d.am && !d.pm && (d.reps || 0) === 0;
+  const nothingYet = !anythingLogged(d);
   const missing = incompleteParts();
 
   if (now.getHours() >= s.remindHour && missing.length) {
     b.classList.add("show");
     b.innerHTML = nothingYet
-      ? "<strong>It's past " + hourLabel(s.remindHour) + "</strong> and nothing's logged today. Even one set of PPT reps counts."
+      ? "<strong>It's past " + hourLabel(s.remindHour) + "</strong> and nothing's logged today. Even one stretch counts."
       : "<strong>Still to do today:</strong> " + missing.join(", ") + ".";
   } else {
     b.classList.remove("show");
@@ -841,7 +1152,7 @@ function checkReminder() {
     if (window.Notification && Notification.permission === "granted") {
       try {
         new Notification("Daily Practice", {
-          body: "Past " + hourLabel(s.remindHour) + " — no yoga or PPT reps logged yet today.",
+          body: "Past " + hourLabel(s.remindHour) + " — nothing logged yet today.",
           tag: "dp-reminder"
         });
         db.lastNotified = todayKey(); save();
@@ -1044,44 +1355,87 @@ $("sessFinish").addEventListener("click", e => { e.stopPropagation(); sess.runni
 /* =====================================================================
    YOGA TIMER — only ever runs for today
    ===================================================================== */
-const yg = { which: "am", running: false, total: 300, left: 300, tEnd: 0, iv: 0 };
-function openYoga(which) {
-  yg.which = which;
-  yg.total = (which === "am" ? S().amMin : S().pmMin) * 60;
-  yg.left = yg.total; yg.running = false;
-  $("yLabel").textContent = which === "am" ? "Morning yoga" : "Evening yoga";
-  $("yTime").textContent = fmtTime(yg.left);
+const tm = { mode: "yoga", which: "am", c: "", id: "", phases: [], pi: 0, running: false, left: 0, tEnd: 0, iv: 0 };
+function openTimer(cfg) {
+  clearInterval(tm.iv);
+  Object.assign(tm, cfg, { pi: 0, running: false });
+  tm.left = tm.phases[0].secs;
+  $("yLabel").textContent = cfg.title;
+  showPhase();
   $("yMain").textContent = "Start";
   $("yogaTimer").classList.add("open");
   keepAwake(true);
+  unlockAudio();
 }
-function closeYoga(markDone) {
-  clearInterval(yg.iv); yg.running = false;
-  const d = day(todayKey());
-  const elapsed = Math.round(yg.total - yg.left);
-  if (yg.which === "am") { d.amSec = Math.max(d.amSec || 0, elapsed); if (markDone) { d.am = true; d.log.push({ t: Date.now(), am: true }); } }
-  else { d.pmSec = Math.max(d.pmSec || 0, elapsed); if (markDone) { d.pm = true; d.log.push({ t: Date.now(), pm: true }); } }
-  save();
+function showPhase() {
+  const p = tm.phases[tm.pi];
+  $("ySub").textContent = p.label || "";
+  $("yTime").textContent = fmtTime(Math.ceil(tm.left));
+  $("yTime").classList.toggle("lead", p.kind === "lead");
+}
+function openYoga(which) {
+  const secs = (which === "am" ? S().amMin : S().pmMin) * 60;
+  openTimer({ mode: "yoga", which: which, title: which === "am" ? "Morning yoga" : "Evening yoga", phases: [{ kind: "run", secs: secs, label: "" }] });
+}
+/* Timed stretch: 5-second "Get set" so you can get onto the roller or the wall,
+   then the hold; "each side" items add a switch and a second hold. */
+function openRxTimer(c, it) {
+  const e = rxOf(dayRO(todayKey()), it.id), setNo = (e ? e.s : 0) + 1;
+  const setTxt = it.sets > 1 ? "Set " + setNo + " of " + it.sets : "";
+  const join = (a, b) => a && b ? a + " · " + b : (a || b);
+  const ph = [{ kind: "lead", secs: 5, label: join("Get set", setTxt) }];
+  if (it.side) {
+    ph.push({ kind: "run", secs: it.secs, label: join("First side", setTxt) });
+    ph.push({ kind: "lead", secs: 5, label: "Switch sides" });
+    ph.push({ kind: "run", secs: it.secs, label: join("Second side", setTxt) });
+  } else {
+    ph.push({ kind: "run", secs: it.secs, label: setTxt });
+  }
+  openTimer({ mode: "rx", c: c, id: it.id, title: it.name, phases: ph });
+}
+function closeTimer(markDone) {
+  clearInterval(tm.iv); tm.running = false;
+  if (tm.mode === "yoga") {
+    const d = day(todayKey());
+    const elapsed = Math.round(tm.phases[0].secs - tm.left);
+    if (tm.which === "am") { d.amSec = Math.max(d.amSec || 0, elapsed); if (markDone) { d.am = true; d.log.push({ t: Date.now(), am: true }); } }
+    else { d.pmSec = Math.max(d.pmSec || 0, elapsed); if (markDone) { d.pm = true; d.log.push({ t: Date.now(), pm: true }); } }
+    save();
+    if (markDone) toast(tm.which === "am" ? "Morning yoga logged" : "Evening yoga logged");
+  } else if (markDone) {
+    logSet(tm.c, tm.id, todayKey(), true);
+  }
   $("yogaTimer").classList.remove("open");
   keepAwake(false);
   renderAll();
-  if (markDone) toast(yg.which === "am" ? "Morning yoga logged" : "Evening yoga logged");
+}
+function timerTick() {
+  tm.left = (tm.tEnd - Date.now()) / 1000;
+  if (tm.left <= 0) {
+    if (tm.pi + 1 < tm.phases.length) {
+      tm.pi++;
+      const np = tm.phases[tm.pi];
+      tm.left = np.secs; tm.tEnd = Date.now() + np.secs * 1000;
+      if (np.kind === "run") cueSqueeze(); else cueRelease();
+      showPhase();
+      return;
+    }
+    clearInterval(tm.iv); tm.left = 0; cueDone(); closeTimer(true);
+    return;
+  }
+  $("yTime").textContent = fmtTime(Math.ceil(tm.left));
 }
 $("yMain").addEventListener("click", () => {
-  if (!yg.running) {
-    yg.running = true; yg.tEnd = Date.now() + yg.left * 1000;
+  if (!tm.running) {
+    tm.running = true; tm.tEnd = Date.now() + tm.left * 1000;
     $("yMain").textContent = "Pause";
-    yg.iv = setInterval(() => {
-      yg.left = (yg.tEnd - Date.now()) / 1000;
-      $("yTime").textContent = fmtTime(yg.left);
-      if (yg.left <= 0) { clearInterval(yg.iv); yg.left = 0; cueDone(); closeYoga(true); }
-    }, 250);
+    tm.iv = setInterval(timerTick, 250);
   } else {
-    yg.running = false; clearInterval(yg.iv); $("yMain").textContent = "Resume";
+    tm.running = false; clearInterval(tm.iv); $("yMain").textContent = "Resume";
   }
 });
-$("yDone").addEventListener("click", () => closeYoga(true));
-$("yExit").addEventListener("click", () => closeYoga(false));
+$("yDone").addEventListener("click", () => closeTimer(true));
+$("yExit").addEventListener("click", () => closeTimer(false));
 
 /* =====================================================================
    HISTORY
@@ -1095,20 +1449,40 @@ function streakFor(test) {
   if (start) {
     let d = parseKey(start), guard = 0;
     while (d <= end && guard++ < 4000) {
-      if (test(dayRO(key(d)))) { run++; best = Math.max(best, run); } else { run = 0; }
+      const k = key(d);
+      if (test(dayRO(k), k)) { run++; best = Math.max(best, run); } else { run = 0; }
       d = addDays(d, 1);
     }
   }
   let cur = 0, x = new Date(), guard2 = 0;
-  if (!test(dayRO(key(x)))) x = addDays(x, -1);
-  while (test(dayRO(key(x))) && guard2++ < 4000) { cur++; x = addDays(x, -1); }
+  if (!test(dayRO(key(x)), key(x))) x = addDays(x, -1);
+  while (test(dayRO(key(x)), key(x)) && guard2++ < 4000) { cur++; x = addDays(x, -1); }
+  return { cur: cur, best: Math.max(best, cur) };
+}
+/* PPT reps by the week. This week can't break the streak until it's over. */
+function weekStreak() {
+  const tgt = pptWeekTarget(), ks = allKeys(), now = weekStart(new Date());
+  let best = 0, run = 0;
+  if (ks.length) {
+    let w = weekStart(parseKey(ks[0])), g = 0;
+    while (w <= now && g++ < 800) {
+      if (weekReps(w) >= tgt) { run++; best = Math.max(best, run); }
+      else if (+w !== +now) run = 0;
+      w = addDays(w, 7);
+    }
+  }
+  let cur = 0, w = now, g2 = 0;
+  if (weekReps(w) < tgt) w = addDays(w, -7);
+  while (weekReps(w) >= tgt && g2++ < 800) { cur++; w = addDays(w, -7); }
   return { cur: cur, best: Math.max(best, cur) };
 }
 const TESTS = {
-  all: d => dayScore(d) >= 0.999,
-  keg: d => (d.reps || 0) >= kegTarget(),
+  /* Day streak: before the routine, all three targets; since then, both yoga sessions. */
+  all: (d, k) => isLegacy(k) ? dayScore(d, k) >= 0.999 : (!!d.am && !!d.pm),
   am: d => !!d.am,
-  pm: d => !!d.pm
+  pm: d => !!d.pm,
+  ex: (d, k) => !isLegacy(k) && doneCount(d, "ex") >= S().doneAt,
+  st: (d, k) => !isLegacy(k) && doneCount(d, "st") >= S().doneAt
 };
 function streaks() { return streakFor(TESTS.all); }
 
@@ -1118,7 +1492,7 @@ function renderHistory() {
   $("stBest").textContent = st.best;
 
   let sum = 0, n = 0;
-  for (let i = 29; i >= 0; i--) { sum += dayScore(dayRO(key(addDays(new Date(), -i)))); n++; }
+  for (let i = 29; i >= 0; i--) { const k = key(addDays(new Date(), -i)); sum += dayScore(dayRO(k), k); n++; }
   $("stRate").textContent = Math.round((sum / n) * 100) + "%";
 
   renderExStreaks();
@@ -1129,22 +1503,27 @@ function renderHistory() {
 }
 
 function renderExStreaks() {
+  const s = S();
   const rows = [
-    { k: "keg", name: "PPT Reps", color: "var(--s1)", goal: kegTarget() + " reps" },
-    { k: "am", name: "Morning yoga", color: "var(--s2)", goal: S().amMin + " min" },
-    { k: "pm", name: "Evening yoga", color: "var(--s3)", goal: S().pmMin + " min" }
+    { name: "Morning yoga", color: "var(--s2)", goal: s.amMin + " min", r: streakFor(TESTS.am), unit: "day" },
+    { name: "Evening yoga", color: "var(--s3)", goal: s.pmMin + " min", r: streakFor(TESTS.pm), unit: "day" },
+    { name: "Exercises", color: "var(--s4)", goal: s.doneAt + " a day", r: streakFor(TESTS.ex), unit: "day" },
+    { name: "Stretches", color: "var(--s5)", goal: s.doneAt + " a day", r: streakFor(TESTS.st), unit: "day" },
+    { name: "PPT Reps", color: "var(--s1)", goal: s.pptWeekSets + " sets a week", r: weekStreak(), unit: "week" }
   ];
   let h = "";
-  rows.forEach(r => {
-    const s = streakFor(TESTS[r.k]);
+  rows.forEach(row => {
+    const r = row.r;
     h += '<div class="exstreak">' +
-      '<span class="swatch" style="background:' + r.color + '"></span>' +
-      '<span class="nm">' + r.name + '<span class="goal">' + r.goal + '</span></span>' +
-      '<span class="cur"' + (s.cur > 0 ? '' : ' style="color:var(--text-muted)"') + '>' + s.cur + '<span class="unit">' + (s.cur === 1 ? "day" : "days") + '</span></span>' +
-      '<span class="best">best ' + s.best + '</span>' +
+      '<span class="swatch" style="background:' + row.color + '"></span>' +
+      '<span class="nm">' + row.name + '<span class="goal">' + row.goal + '</span></span>' +
+      '<span class="cur"' + (r.cur > 0 ? '' : ' style="color:var(--text-muted)"') + '>' + r.cur + '<span class="unit">' + row.unit + (r.cur === 1 ? "" : "s") + '</span></span>' +
+      '<span class="best">best ' + r.best + '</span>' +
       '</div>';
   });
   $("exStreaks").innerHTML = h;
+  $("streakNote").textContent = "Your day streak counts days with both yoga sessions. Exercises and stretches count once you do " +
+    s.doneAt + " in a day; PPT reps count by the week (Monday to Sunday). Today — or this week — won't break a streak until it's over.";
 }
 
 function renderHeat() {
@@ -1162,7 +1541,7 @@ function renderHeat() {
       const cur = addDays(d, r);
       let bg = "transparent", title = "", off = "";
       if (cur <= end && cur >= firstDay) {
-        const sc = dayScore(dayRO(key(cur)));
+        const sc = dayScore(dayRO(key(cur)), key(cur));
         const lvl = sc <= 0 ? 0 : sc < 0.34 ? 1 : sc < 0.67 ? 2 : sc < 0.999 ? 3 : 4;
         bg = "var(--heat-" + lvl + ")";
         title = cur.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " — " + Math.round(sc * 100) + "%";
@@ -1188,18 +1567,36 @@ function renderHeat() {
   lab.innerHTML = labels;
 }
 
+/* Rolling 7-day rates. Exercises/stretches only average over days since the routine
+   started (null before that, so their lines begin there). PPT: for windows ending before
+   the routine, the old daily average; after, reps in the window vs the weekly target. */
+const TREND_SERIES = [
+  { key: "am", color: "var(--s2)", name: "AM" },
+  { key: "pm", color: "var(--s3)", name: "PM" },
+  { key: "ex", color: "var(--s4)", name: "Exercises" },
+  { key: "st", color: "var(--s5)", name: "Stretches" },
+  { key: "kg", color: "var(--s1)", name: "PPT" }
+];
 function seriesData(days) {
   const out = [];
   for (let i = days - 1; i >= 0; i--) {
-    const dt = addDays(new Date(), -i);
-    let kg = 0, am = 0, pm = 0;
+    const dt = addDays(new Date(), -i), k = key(dt);
+    let kgDaily = 0, kgReps = 0, am = 0, pm = 0, ex = 0, st = 0, nNew = 0;
     for (let w = 0; w < 7; w++) {
-      const dd = dayRO(key(addDays(dt, -w)));
-      kg += Math.min(1, (dd.reps || 0) / kegTarget());
+      const wk = key(addDays(dt, -w)), dd = dayRO(wk);
+      kgDaily += Math.min(1, (dd.reps || 0) / kegTarget());
+      kgReps += dd.reps || 0;
       am += dd.am ? 1 : 0;
       pm += dd.pm ? 1 : 0;
+      if (!isLegacy(wk)) { ex += catFrac(dd, "ex"); st += catFrac(dd, "st"); nNew++; }
     }
-    out.push({ k: key(dt), dt: dt, kg: kg / 7, am: am / 7, pm: pm / 7 });
+    out.push({
+      k: k, dt: dt,
+      kg: isLegacy(k) ? kgDaily / 7 : Math.min(1, kgReps / pptWeekTarget()),
+      am: am / 7, pm: pm / 7,
+      ex: nNew ? ex / nNew : null,
+      st: nNew ? st / nNew : null
+    });
   }
   return out;
 }
@@ -1222,26 +1619,30 @@ function renderTrend() {
   });
   s += '</g>';
 
-  const series = [
-    { key: "kg", color: "var(--s1)" },
-    { key: "am", color: "var(--s2)" },
-    { key: "pm", color: "var(--s3)" }
-  ];
   const last = data[data.length - 1];
-  series.forEach(se => {
-    let dstr = "";
-    data.forEach((p, i) => { dstr += (i ? " L" : "M") + x(i).toFixed(1) + " " + y(p[se.key]).toFixed(1); });
-    s += '<path d="' + dstr + '" fill="none" stroke="' + se.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-    s += '<circle cx="' + x(data.length - 1).toFixed(1) + '" cy="' + y(last[se.key]).toFixed(1) + '" r="3.5" fill="' + se.color + '" stroke="var(--surface-1)" stroke-width="2"/>';
+  const labels = [];
+  TREND_SERIES.forEach(se => {
+    let dstr = "", started = false;
+    data.forEach((p, i) => {
+      const v = p[se.key];
+      if (v === null) { started = false; return; }
+      dstr += (started ? " L" : (dstr ? " M" : "M")) + x(i).toFixed(1) + " " + y(v).toFixed(1);
+      started = true;
+    });
+    if (dstr) s += '<path d="' + dstr + '" fill="none" stroke="' + se.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    if (last[se.key] !== null) {
+      s += '<circle cx="' + x(data.length - 1).toFixed(1) + '" cy="' + y(last[se.key]).toFixed(1) + '" r="3.5" fill="' + se.color + '" stroke="var(--surface-1)" stroke-width="2"/>';
+      labels.push({ v: last[se.key], y: y(last[se.key]) });
+    }
   });
-  const labels = series.map(se => ({ color: se.color, v: last[se.key], y: y(last[se.key]) })).sort((a, b) => a.y - b.y);
+  labels.sort((a, b) => a.y - b.y);
   for (let i = 1; i < labels.length; i++) {
     if (labels[i].y - labels[i - 1].y < 12) labels[i].y = labels[i - 1].y + 12;
   }
-  const overflow = labels[labels.length - 1].y - (pad.t + ih);
+  const overflow = labels.length ? labels[labels.length - 1].y - (pad.t + ih) : 0;
   if (overflow > 0) labels.forEach(l => { l.y -= overflow; });
   labels.forEach(l => {
-    s += '<text x="' + (W - pad.r + 7) + '" y="' + (l.y + 3.5).toFixed(1) + '" font-size="10.5" fill="' + l.color + '" font-weight="640">' + Math.round(l.v * 100) + '</text>';
+    s += '<text x="' + (W - pad.r + 7) + '" y="' + (l.y + 3.5).toFixed(1) + '" font-size="10.5" fill="var(--text-secondary)" font-weight="640">' + Math.round(l.v * 100) + '</text>';
   });
 
   s += '<line x1="' + pad.l + '" y1="' + y(0) + '" x2="' + (W - pad.r) + '" y2="' + y(0) + '" stroke="var(--baseline)" stroke-width="1"/>';
@@ -1268,10 +1669,13 @@ function trendHover(evt) {
   const line = document.getElementById("cross");
   if (line) { line.setAttribute("x1", g.x(i)); line.setAttribute("x2", g.x(i)); line.setAttribute("opacity", "1"); }
   const tt = $("tt");
-  tt.innerHTML = "<strong>" + p.dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + "</strong><br>" +
-    "PPT " + Math.round(p.kg * 100) + "% · AM " + Math.round(p.am * 100) + "% · PM " + Math.round(p.pm * 100) + "%";
+  const part = se => p[se.key] === null ? "" : se.name + " " + Math.round(p[se.key] * 100) + "%";
+  const row1 = TREND_SERIES.slice(0, 2).map(part).filter(Boolean).join(" · ");
+  const row2 = TREND_SERIES.slice(2).map(part).filter(Boolean).join(" · ");
+  tt.innerHTML = "<strong>" + p.dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + "</strong><br>" + row1 + (row2 ? "<br>" + row2 : "");
   tt.classList.add("show");
-  tt.style.left = Math.max(0, Math.min(r.width - 170, (g.x(i) / scale) - 85)) + "px";
+  const tw = tt.offsetWidth || 200;
+  tt.style.left = Math.max(0, Math.min(r.width - tw, (g.x(i) / scale) - tw / 2)) + "px";
   tt.style.top = "2px";
 }
 $("trend").addEventListener("mousemove", trendHover);
@@ -1282,25 +1686,33 @@ $("trend").addEventListener("touchend", () => { $("tt").classList.remove("show")
 
 function renderTotals() {
   const ks = allKeys();
-  let reps = 0, am = 0, pm = 0, full = 0;
-  ks.forEach(k => { const d = db.days[k]; reps += d.reps || 0; am += d.am ? 1 : 0; pm += d.pm ? 1 : 0; if (dayScore(d) >= 0.999) full++; });
+  let reps = 0, am = 0, pm = 0, full = 0, ex = 0, st = 0;
+  ks.forEach(k => {
+    const d = db.days[k];
+    reps += d.reps || 0; am += d.am ? 1 : 0; pm += d.pm ? 1 : 0;
+    ex += doneCount(d, "ex"); st += doneCount(d, "st");
+    if (dayScore(d, k) >= 0.999) full++;
+  });
   $("totals").innerHTML =
     "<div class='field'><span>Total PPT reps</span><strong>" + reps.toLocaleString() + "</strong></div>" +
     "<div class='field'><span>Morning yoga sessions</span><strong>" + am + "</strong></div>" +
     "<div class='field'><span>Evening yoga sessions</span><strong>" + pm + "</strong></div>" +
+    "<div class='field'><span>Exercises done</span><strong>" + ex + "</strong></div>" +
+    "<div class='field'><span>Stretches done</span><strong>" + st + "</strong></div>" +
     "<div class='field'><span>Perfect days</span><strong>" + full + "</strong></div>" +
     "<div class='field'><span>Days tracked</span><strong>" + ks.length + "</strong></div>";
 }
 
 function buildTable() {
-  let h = '<table class="data"><thead><tr><th>Date</th><th>PPT</th><th>AM</th><th>PM</th><th></th></tr></thead><tbody>';
+  let h = '<table class="data"><thead><tr><th>Date</th><th>PPT</th><th>AM</th><th>PM</th><th>Ex</th><th>St</th><th></th></tr></thead><tbody>';
   const ks = allKeys().slice().reverse();
-  if (!ks.length) h += '<tr><td colspan="5" class="muted">No data yet.</td></tr>';
+  if (!ks.length) h += '<tr><td colspan="7" class="muted">No data yet.</td></tr>';
   ks.forEach(k => {
-    const d = db.days[k];
+    const d = db.days[k], legacy = isLegacy(k);
     const back = Math.round((new Date(todayKey()) - parseKey(k)) / 86400000);
     const canEdit = back >= 0 && back <= MAX_BACK;
     h += "<tr><td>" + k + "</td><td>" + (d.reps || 0) + "</td><td>" + (d.am ? "✓" : "—") + "</td><td>" + (d.pm ? "✓" : "—") + "</td>" +
+      "<td>" + (legacy ? "" : doneCount(d, "ex")) + "</td><td>" + (legacy ? "" : doneCount(d, "st")) + "</td>" +
       '<td class="edit">' + (canEdit ? '<button class="rowedit" data-offset="' + back + '">edit</button>' : "") + "</td></tr>";
   });
   h += "</tbody></table>";
@@ -1316,10 +1728,17 @@ $("btn-table").addEventListener("click", () => {
 /* =====================================================================
    SETTINGS
    ===================================================================== */
+/* Import calls initSettings again; listeners must only be attached once. */
+function bindOnce(el, ev, fn) {
+  el._bound = el._bound || {};
+  if (el._bound[ev]) return;
+  el._bound[ev] = true;
+  el.addEventListener(ev, fn);
+}
 function bindNum(id, prop) {
   const el = $(id);
   el.value = S()[prop];
-  el.addEventListener("change", () => {
+  bindOnce(el, "change", () => {
     let v = parseInt(el.value, 10);
     if (prop === "remindHour") { v = Math.max(0, Math.min(23, isNaN(v) ? 15 : v)); }
     else if (isNaN(v) || v < 1) { v = DEFAULTS.settings[prop]; }
@@ -1328,28 +1747,32 @@ function bindNum(id, prop) {
 }
 function initSettings() {
   bindNum("s-am", "amMin"); bindNum("s-pm", "pmMin");
-  bindNum("s-sets", "sets"); bindNum("s-reps", "reps");
+  bindNum("s-wsets", "pptWeekSets"); bindNum("s-reps", "reps");
+  bindNum("s-expicks", "exPicks"); bindNum("s-stpicks", "stPicks"); bindNum("s-doneat", "doneAt");
   bindNum("s-hold", "hold"); bindNum("s-rest", "rest");
   bindNum("s-remind", "remindHour");
 
   const cue = $("s-cue"); cue.value = S().cue;
-  cue.addEventListener("change", () => { S().cue = cue.value; save(); updateCueDesc(); });
+  bindOnce(cue, "change", () => { S().cue = cue.value; save(); updateCueDesc(); });
   updateCueDesc();
 
   const dc = $("s-discreet"); dc.checked = !!S().discreetDefault;
-  dc.addEventListener("change", () => { S().discreetDefault = dc.checked; save(); });
+  bindOnce(dc, "change", () => { S().discreetDefault = dc.checked; save(); });
 
   const th = $("s-theme"); th.value = S().theme;
-  th.addEventListener("change", () => { S().theme = th.value; save(); applyTheme(); });
+  bindOnce(th, "change", () => { S().theme = th.value; save(); applyTheme(); });
 
-  $("btn-testcue").addEventListener("click", () => { unlockAudio(); cueSqueeze(); setTimeout(cueRelease, 700); toast("Cue sent"); });
+  bindOnce($("btn-testcue"), "click", () => { unlockAudio(); cueSqueeze(); setTimeout(cueRelease, 700); toast("Cue sent"); });
 
   updateNotifState();
-  $("btn-notif").addEventListener("click", async () => {
+  bindOnce($("btn-notif"), "click", async () => {
     if (!window.Notification) { toast("This browser has no notifications"); return; }
     try { await Notification.requestPermission(); } catch (e) {}
     updateNotifState();
   });
+
+  editOpen = "";
+  CATS.forEach(renderEditor);
 
   $("storageNote").textContent = memoryOnly
     ? "Heads up: this browser is blocking local storage, so history lives only in this tab. Export a backup before closing."
@@ -1393,14 +1816,145 @@ $("fileIn").addEventListener("change", e => {
     try {
       const obj = JSON.parse(r.result);
       if (!obj || typeof obj !== "object" || !obj.days) throw new Error("bad file");
-      db = Object.assign({}, DEFAULTS, obj);
-      db.settings = Object.assign({}, DEFAULTS.settings, obj.settings || {});
+      db = normalize(obj);
       save(); initSettings(); applyTheme(); renderAll();
       toast("Backup restored");
     } catch (err) { toast("Couldn't read that file"); }
   };
   r.readAsText(f);
+  e.target.value = "";
 });
+
+/* =====================================================================
+   ROUTINE — logging, swapping, editing
+   ===================================================================== */
+function offsetOf(k) { return Math.round((parseKey(todayKey()) - parseKey(k)) / 86400000); }
+function forWhen(k) { return k === todayKey() ? "" : " for " + dayLabelText(offsetOf(k)).toLowerCase(); }
+
+/* Adds one set. Tapping an item that's already done un-marks it (Undo last brings it back).
+   addOnly: from a timer finishing — never un-marks. */
+function logSet(c, id, k, addOnly) {
+  const it = itemById(c, id), d = day(k);
+  let e = d.rx[id];
+  if (isDone(e)) {
+    if (addOnly) { toast((it ? it.name : "That") + " is already done"); return; }
+    d.log.push({ t: Date.now(), rx: id, c: c, reset: e.s, of: e.of });
+    delete d.rx[id];
+    save(); renderAll();
+    toast((it ? it.name : "That") + " un-marked" + forWhen(k));
+    return;
+  }
+  if (!it) return;
+  if (!e) e = d.rx[id] = { s: 0, of: it.sets, c: c };
+  e.of = it.sets;
+  e.s++;
+  d.log.push({ t: Date.now(), rx: id, c: c });
+  save(); renderAll();
+  toast(isDone(e) ? it.name + " done" + forWhen(k) : it.name + " · set " + e.s + " of " + e.of + forWhen(k));
+}
+/* Not today: drops it from the day's picks and the next in line takes its place.
+   It stays at the front of the rotation, so it comes up first next time. */
+function swapPick(c, id, k) {
+  const d = day(k);
+  d.skip = d.skip || {};
+  const arr = d.skip[c] = d.skip[c] || [];
+  if (arr.indexOf(id) < 0) arr.push(id);
+  d.log.push({ t: Date.now(), swap: id, c: c });
+  save(); renderAll();
+  const it = itemById(c, id);
+  toast("Swapped out " + (it ? it.name : "that one") + " · it's first up next time");
+}
+function onPickClick(ev) {
+  const b = ev.target.closest("[data-act]"); if (!b) return;
+  const row = b.closest(".pick"), c = row.dataset.c, id = row.dataset.id;
+  const k = ev.currentTarget.dataset.scope === "today" ? todayKey() : viewKey();
+  if (b.dataset.act === "swap") { swapPick(c, id, k); return; }
+  const it = itemById(c, id);
+  if (it && it.type === "time" && !isDone(rxOf(dayRO(k), id)) && k === todayKey()) { openRxTimer(c, it); return; }
+  logSet(c, id, k, false);
+}
+["picks-ex", "picks-st", "list-ex", "list-st"].forEach(id => $(id).addEventListener("click", onPickClick));
+
+/* ---------- editor in Settings ---------- */
+let editOpen = "", removeArm = "";
+function renderEditor(c) {
+  const list = items(c);
+  let h = "";
+  list.forEach((it, i) => {
+    const open = editOpen === it.id, nm = esc(it.name);
+    h += '<div class="ed" data-c="' + c + '" data-id="' + esc(it.id) + '">' +
+      '<button class="edhead" data-ed="toggle" aria-expanded="' + open + '"><span class="nm">' + nm + '</span><span class="sp">' + esc(spec(it)) + '</span><span class="chev">' + (open ? "Close" : "Edit") + '</span></button>';
+    if (open) {
+      h += '<div class="edform">' +
+        '<div class="field stack"><label>Name</label><input type="text" data-f="name" aria-label="Name" maxlength="60" value="' + nm + '"></div>' +
+        '<div class="field"><label>Type</label><select data-f="type" aria-label="Type"><option value="reps"' + (it.type !== "time" ? " selected" : "") + '>Reps</option><option value="time"' + (it.type === "time" ? " selected" : "") + '>Timed</option></select></div>' +
+        '<div class="field"><label>Sets</label><input type="number" data-f="sets" aria-label="Sets" min="1" max="10" value="' + it.sets + '"></div>' +
+        (it.type === "time"
+          ? '<div class="field"><div><label>Seconds</label><div class="desc">per set' + (it.side ? ", each side" : "") + '</div></div><input type="number" data-f="secs" aria-label="Seconds" min="5" max="600" value="' + it.secs + '"></div>'
+          : '<div class="field"><label>Reps per set</label><input type="number" data-f="reps" aria-label="Reps per set" min="1" max="100" value="' + it.reps + '"></div>') +
+        '<div class="field"><div><label>Each side</label><div class="desc">' + (it.type === "time" ? "timer runs once for each side" : "shown as “each side”") + '</div></div>' +
+          '<span class="switch"><input type="checkbox" data-f="side" aria-label="Each side"' + (it.side ? " checked" : "") + '><span class="track"></span><span class="knob"></span></span></div>' +
+        '<div class="field stack"><label>Cue</label><input type="text" data-f="note" aria-label="Cue" maxlength="120" placeholder="Optional reminder of how to do it" value="' + esc(it.note) + '"></div>' +
+        '<div class="tools">' +
+          '<button class="sm" data-ed="up"' + (i === 0 ? " disabled" : "") + '>Move up</button>' +
+          '<button class="sm" data-ed="down"' + (i === list.length - 1 ? " disabled" : "") + '>Move down</button>' +
+          '<button class="sm ghost danger" data-ed="remove">' + (removeArm === it.id ? "Tap again to remove" : "Remove") + '</button>' +
+        '</div></div>';
+    }
+    h += '</div>';
+  });
+  if (!list.length) h = '<div class="muted" style="padding:6px 0">Nothing here yet.</div>';
+  $("edit-" + c).innerHTML = h;
+}
+function onEditorClick(ev) {
+  const b = ev.target.closest("[data-ed]"); if (!b) return;
+  const wrap = b.closest(".ed"), c = wrap.dataset.c, id = wrap.dataset.id;
+  const list = items(c), i = list.findIndex(x => x.id === id), act = b.dataset.ed;
+  if (i < 0) return;
+  if (act === "toggle") { editOpen = editOpen === id ? "" : id; removeArm = ""; renderEditor(c); return; }
+  if (act === "up" && i > 0) list.splice(i - 1, 0, list.splice(i, 1)[0]);
+  else if (act === "down" && i < list.length - 1) list.splice(i + 1, 0, list.splice(i, 1)[0]);
+  else if (act === "remove") {
+    if (removeArm !== id) { removeArm = id; renderEditor(c); return; }
+    const gone = list.splice(i, 1)[0];
+    removeArm = ""; editOpen = "";
+    toast("Removed " + gone.name + " · past days keep their record");
+  }
+  save(); renderEditor(c); renderAll();
+}
+function onEditorChange(ev) {
+  const el = ev.target, f = el.dataset.f; if (!f) return;
+  const wrap = el.closest(".ed"), c = wrap.dataset.c, it = itemById(c, wrap.dataset.id);
+  if (!it) return;
+  if (f === "name") { it.name = el.value.trim() || it.name; el.value = it.name; }
+  else if (f === "note") it.note = el.value.trim();
+  else if (f === "type") it.type = el.value === "time" ? "time" : "reps";
+  else if (f === "side") it.side = el.checked;
+  else {
+    const lim = { sets: [1, 10], reps: [1, 100], secs: [5, 600] }[f];
+    let v = parseInt(el.value, 10);
+    if (isNaN(v)) v = it[f];
+    it[f] = Math.max(lim[0], Math.min(lim[1], v));
+    el.value = it[f];
+  }
+  save();
+  if (f === "type" || f === "side") renderEditor(c);
+  else { wrap.querySelector(".edhead .nm").textContent = it.name; wrap.querySelector(".edhead .sp").textContent = spec(it); }
+  renderAll();
+}
+CATS.forEach(c => {
+  $("edit-" + c).addEventListener("click", onEditorClick);
+  $("edit-" + c).addEventListener("change", onEditorChange);
+});
+document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => {
+  const c = b.dataset.add;
+  const it = { id: c + "-" + Date.now().toString(36), name: c === "ex" ? "New exercise" : "New stretch", type: "reps", sets: 1, reps: 10, secs: 30, side: false, note: "" };
+  items(c).push(it);
+  editOpen = it.id; removeArm = "";
+  save(); renderEditor(c); renderAll();
+  const inp = $("edit-" + c).querySelector('.ed[data-id="' + it.id + '"] input[data-f="name"]');
+  if (inp) { inp.focus(); inp.select(); }
+}));
 
 /* =====================================================================
    WIRING
@@ -1481,6 +2035,14 @@ document.querySelectorAll("[data-quick]").forEach(b => {
       if (last.reps) d.reps = Math.max(0, (d.reps || 0) - last.reps);
       if (last.am) d.am = false;
       if (last.pm) d.pm = false;
+      if (last.rx) {
+        if (last.reset !== undefined) d.rx[last.rx] = { s: last.reset, of: last.of, c: last.c };
+        else { const e = d.rx[last.rx]; if (e) { e.s--; if (e.s <= 0) delete d.rx[last.rx]; } }
+      }
+      if (last.swap && d.skip && d.skip[last.c]) {
+        const i = d.skip[last.c].indexOf(last.swap);
+        if (i >= 0) d.skip[last.c].splice(i, 1);
+      }
       toast("Undone" + when);
     }
     save(); renderAll();
