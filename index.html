@@ -117,15 +117,26 @@ header.app .date { font-size: 13px; color: var(--text-muted); }
 .muted { color: var(--text-muted); font-size: 13px; }
 .sec { color: var(--text-secondary); font-size: 14px; }
 
-/* ---------- buttons ---------- */
 button { font: inherit; font-weight: 560; cursor: pointer; border-radius: 11px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); padding: 11px 16px; transition: transform .08s ease, background .15s ease; }
 button:active { transform: scale(0.975); }
 button.primary { background: var(--s1); border-color: transparent; color: #fff; }
 button.ghost { background: transparent; }
 button.full { width: 100%; }
 button.sm { padding: 8px 12px; font-size: 14px; border-radius: 9px; }
-button:disabled { opacity: .45; cursor: default; }
+button:disabled { opacity: .35; cursor: default; }
 button.done { background: var(--surface-2); color: var(--success-text); border-color: var(--border); }
+
+/* ---------- day navigator ---------- */
+.daynav { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px; }
+.daynav .navbtn {
+  width: 44px; height: 40px; padding: 0; font-size: 21px; line-height: 1;
+  background: var(--surface-1); color: var(--text-secondary); border-radius: 11px;
+}
+.daynav .daylabel {
+  flex: 1 1 auto; max-width: 240px; text-align: center; padding: 10px 12px;
+  background: var(--surface-1); font-size: 15px; font-weight: 620; letter-spacing: -0.01em;
+}
+.daynav.past .daylabel { background: var(--s1); color: #fff; border-color: transparent; }
 
 /* ---------- today cards ---------- */
 .ex { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--grid); }
@@ -143,10 +154,10 @@ button.done { background: var(--surface-2); color: var(--success-text); border-c
 .hero .big { font-size: 42px; font-weight: 680; letter-spacing: -0.03em; line-height: 1.05; }
 .hero .sub { font-size: 13.5px; color: var(--text-muted); margin-top: 4px; }
 
-/* ---------- banner ---------- */
 .banner { display: none; background: var(--surface-1); border: 1px solid var(--border); border-left: 4px solid var(--warning); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; }
 .banner.show { display: block; }
 .banner strong { font-weight: 640; }
+.banner.info { border-left-color: var(--s1); }
 
 /* ---------- tabs ---------- */
 nav.tabs {
@@ -233,7 +244,15 @@ table.data { width: 100%; border-collapse: collapse; font-size: 13px; font-varia
 table.data th, table.data td { text-align: right; padding: 6px 4px; border-bottom: 1px solid var(--grid); }
 table.data th:first-child, table.data td:first-child { text-align: left; }
 table.data th { color: var(--text-muted); font-weight: 580; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
-#tableWrap { display: none; max-height: 320px; overflow-y: auto; margin-top: 12px; }
+table.data td.edit { text-align: center; }
+table.data button.rowedit { padding: 3px 9px; font-size: 12px; border-radius: 7px; }
+#tableWrap { display: none; max-height: 340px; overflow-y: auto; margin-top: 12px; }
+
+/* ---------- week strip ---------- */
+.weekgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+.weekcol { background: none; border: 1px solid transparent; padding: 5px 2px 6px; border-radius: 9px; display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.weekcol[aria-current="true"] { border-color: var(--s1); }
+.weekcol .wd { font-size: 11px; color: var(--text-muted); margin-bottom: 1px; }
 
 /* ---------- settings ---------- */
 .field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--grid); }
@@ -253,7 +272,7 @@ select { width: auto; text-align: left; }
 .tooltip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; font-size: 12.5px; box-shadow: var(--shadow); opacity: 0; transition: opacity .12s; z-index: 5; white-space: nowrap; }
 .tooltip.show { opacity: 1; }
 .chartwrap { position: relative; }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(80px + env(safe-area-inset-bottom)); background: var(--text-primary); color: var(--plane); padding: 10px 16px; border-radius: 99px; font-size: 13.5px; font-weight: 560; opacity: 0; transition: opacity .2s; z-index: 200; pointer-events: none; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(80px + env(safe-area-inset-bottom)); background: var(--text-primary); color: var(--plane); padding: 10px 16px; border-radius: 99px; font-size: 13.5px; font-weight: 560; opacity: 0; transition: opacity .2s; z-index: 200; pointer-events: none; max-width: 86%; text-align: center; }
 .toast.show { opacity: 0.95; }
 </style>
 </head>
@@ -268,17 +287,25 @@ select { width: auto; text-align: left; }
 
 <!-- ============ TODAY ============ -->
 <section class="view active" id="view-today">
+
+  <div class="daynav" id="dayNav">
+    <button class="navbtn" id="dayPrev" aria-label="Previous day">&lsaquo;</button>
+    <button class="daylabel" id="dayLabel">Today</button>
+    <button class="navbtn" id="dayNext" aria-label="Next day">&rsaquo;</button>
+  </div>
+
+  <div class="banner info" id="pastBanner"></div>
   <div class="banner" id="banner"></div>
 
   <div class="card">
     <div class="hero">
       <div class="big" id="heroPct">0%</div>
-      <div class="sub" id="heroSub">today's practice</div>
+      <div class="sub" id="heroSub">of today's practice</div>
     </div>
   </div>
 
   <div class="card">
-    <h2>Today</h2>
+    <h2 id="exHeading">Today</h2>
     <div class="ex">
       <div class="dial" id="dial-am"></div>
       <div class="body">
@@ -306,19 +333,20 @@ select { width: auto; text-align: left; }
   </div>
 
   <div class="card">
-    <h2>Quick log</h2>
+    <h2 id="quickHeading">Quick log</h2>
     <div class="row" style="flex-wrap:wrap; gap:8px;">
       <button class="sm" data-quick="am">✓ Morning yoga</button>
       <button class="sm" data-quick="pm">✓ Evening yoga</button>
       <button class="sm" data-quick="set">✓ PPT set (20)</button>
       <button class="sm ghost" data-quick="undo">Undo last</button>
     </div>
-    <div class="muted" style="margin-top:10px">Use these if you did something away from the app.</div>
+    <div class="muted" style="margin-top:10px" id="quickNote">Use these if you did something away from the app.</div>
   </div>
 
   <div class="card">
     <h2>Last 7 days</h2>
     <div id="week"></div>
+    <div class="muted" style="margin-top:10px">Tap any day to fill it in.</div>
   </div>
 </section>
 
@@ -327,7 +355,7 @@ select { width: auto; text-align: left; }
   <div class="card">
     <div class="hero">
       <div class="big" id="kegBig">0<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / 60</span></div>
-      <div class="sub">reps today &middot; <span id="kegSets">0</span> of 3 sets done</div>
+      <div class="sub" id="kegSub">reps today</div>
     </div>
     <button class="primary full" id="btn-start-session" style="margin-top:14px">Start a set</button>
     <div class="row" style="gap:8px; margin-top:8px">
@@ -385,6 +413,7 @@ select { width: auto; text-align: left; }
       <span class="cell" style="background:var(--heat-4)"></span>
       <span>more</span>
     </div>
+    <div class="note" style="margin-top:8px">Tap a square to open that day and fill it in.</div>
   </div>
 
   <div class="card">
@@ -453,10 +482,8 @@ select { width: auto; text-align: left; }
       <div><label>Works offline</label><div class="desc" id="offlineState">checking…</div></div>
     </div>
     <div class="tip" style="margin-top:10px">
-      For the 3 PM nudge to reach you reliably on a phone, open this from your
-      <strong>home screen</strong>: Share → Add to Home Screen. Web reminders only fire while the
-      app has been opened at some point that day — you'll always see the in-app banner after
-      your reminder hour regardless.
+      Web reminders only fire while the app is open, so the in-app banner after your reminder
+      hour is the dependable one. A daily alarm in the Clock app is the reliable nudge.
     </div>
   </div>
 
@@ -503,7 +530,7 @@ select { width: auto; text-align: left; }
   <div class="ringwrap">
     <svg viewBox="0 0 200 200" width="232" height="232" aria-hidden="true">
       <circle id="ringTrack" cx="100" cy="100" r="88" fill="none" stroke="var(--grid)" stroke-width="7"/>
-      <circle id="ringProg" cx="100" cy="100" r="88" fill="none" stroke="var(--s1)" stroke-width="7" stroke-linecap="round" stroke-dasharray="552.9" stroke-dashoffset="552.9"/>
+      <circle id="ringProg" cx="100" cy="100" r="88" fill="none" stroke="var(--s1)" stroke-width="8" stroke-linecap="round" stroke-dasharray="552.9" stroke-dashoffset="552.9"/>
     </svg>
     <div class="ringtext">
       <div class="phase" id="sessPhase">Ready</div>
@@ -539,8 +566,7 @@ select { width: auto; text-align: left; }
 "use strict";
 
 /* =====================================================================
-   STORAGE  — localStorage when available, in-memory otherwise.
-   Export/Import gives you a real backup either way.
+   STORAGE — localStorage when available, in-memory otherwise.
    ===================================================================== */
 const KEY = "dailyPractice.v1";
 let memoryOnly = false;
@@ -586,6 +612,9 @@ function parseKey(k) { const p = k.split("-"); return new Date(+p[0], +p[1] - 1,
 function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function todayKey() { return key(new Date()); }
 
+/* day(k) creates the record — only call it when writing.
+   dayRO(k) never writes, so browsing back through empty days doesn't
+   litter the history with blank entries. */
 function day(k) {
   k = k || todayKey();
   if (!db.days[k]) db.days[k] = { am: false, pm: false, reps: 0, amSec: 0, pmSec: 0, log: [] };
@@ -602,11 +631,29 @@ function dayScore(d) {
 }
 
 /* =====================================================================
-   CUES — vibration and/or a soft sine blip (works on iOS with earbuds)
+   WHICH DAY AM I LOOKING AT
+   viewOffset 0 = today, 1 = yesterday, … It lives in memory only, so
+   reopening the app always lands on today.
    ===================================================================== */
-/* iPhones do not expose vibration to web apps at all — no browser on iOS can do
-   it, so if it's missing we quietly move to the audio cue rather than leaving
-   her with silent, invisible feedback. */
+const MAX_BACK = 30;
+let viewOffset = 0;
+function viewKey() { return key(addDays(new Date(), -viewOffset)); }
+function isToday() { return viewOffset === 0; }
+function dayLabelText(off) {
+  const o = off === undefined ? viewOffset : off;
+  if (o === 0) return "Today";
+  if (o === 1) return "Yesterday";
+  return addDays(new Date(), -o).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function goToDay(off) {
+  viewOffset = Math.max(0, Math.min(MAX_BACK, off));
+  showView("today");
+  renderAll();
+}
+
+/* =====================================================================
+   CUES
+   ===================================================================== */
 const HAS_VIBRATE = typeof navigator.vibrate === "function";
 if (!HAS_VIBRATE && !db.settings.cueChecked) {
   if (S().cue === "vibrate" || S().cue === "both") S().cue = "sound";
@@ -616,11 +663,7 @@ if (!HAS_VIBRATE && !db.settings.cueChecked) {
 
 let audioCtx = null;
 function unlockAudio() {
-  try {
-    // Ask iOS to treat this as media playback, so the blip still sounds with the
-    // ring/silent switch flipped to silent — which it will be, in a meeting.
-    if (navigator.audioSession) navigator.audioSession.type = "playback";
-  } catch (e) {}
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === "suspended") audioCtx.resume();
@@ -670,7 +713,7 @@ const $ = id => document.getElementById(id);
 let toastTimer = null;
 function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 1900);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2100);
 }
 function dial(el, frac, color, label) {
   const r = 19, c = 2 * Math.PI * r, off = c * (1 - Math.min(1, frac));
@@ -685,13 +728,31 @@ function fmtTime(sec) {
   sec = Math.max(0, Math.round(sec));
   return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
 }
+function renderAll() { renderToday(); renderHistory(); }
 
 /* =====================================================================
-   TODAY VIEW
+   TODAY VIEW (or whichever day is selected)
    ===================================================================== */
 function renderToday() {
-  const d = day(), s = S();
+  const s = S(), k = viewKey(), d = dayRO(k), past = !isToday();
   $("todayLabel").textContent = new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+
+  $("dayLabel").textContent = dayLabelText();
+  $("dayNav").classList.toggle("past", past);
+  $("dayNext").disabled = viewOffset === 0;
+  $("dayPrev").disabled = viewOffset >= MAX_BACK;
+
+  const pb = $("pastBanner");
+  if (past) {
+    pb.classList.add("show");
+    pb.innerHTML = "<strong>Filling in " + dayLabelText().toLowerCase() + ".</strong> Anything you log here is saved to that date. Tap the date button to come back to today.";
+  } else { pb.classList.remove("show"); }
+
+  $("exHeading").textContent = past ? dayLabelText() : "Today";
+  $("quickHeading").textContent = past ? "Log for " + dayLabelText().toLowerCase() : "Quick log";
+  $("quickNote").textContent = past
+    ? "These write to " + dayLabelText().toLowerCase() + ", not today."
+    : "Use these if you did something away from the app.";
 
   const amF = d.am ? 1 : Math.min(0.99, (d.amSec || 0) / (s.amMin * 60));
   const pmF = d.pm ? 1 : Math.min(0.99, (d.pmSec || 0) / (s.pmMin * 60));
@@ -705,17 +766,23 @@ function renderToday() {
   $("meta-pm").textContent = d.pm ? "done" : s.pmMin + " min";
   $("meta-keg").textContent = (d.reps || 0) + " of " + kegTarget() + " reps";
 
-  const bAm = $("btn-am"), bPm = $("btn-pm");
-  bAm.textContent = d.am ? "Done" : "Start"; bAm.className = "sm" + (d.am ? " done" : "");
-  bPm.textContent = d.pm ? "Done" : "Start"; bPm.className = "sm" + (d.pm ? " done" : "");
+  const bAm = $("btn-am"), bPm = $("btn-pm"), bK = $("btn-keg");
+  bAm.textContent = d.am ? "Done" : (past ? "Mark" : "Start");
+  bAm.className = "sm" + (d.am ? " done" : "");
+  bPm.textContent = d.pm ? "Done" : (past ? "Mark" : "Start");
+  bPm.className = "sm" + (d.pm ? " done" : "");
+  bK.textContent = past ? "+" + s.reps : "Session";
+  bK.className = "sm primary";
 
   const pct = Math.round(dayScore(d) * 100);
   $("heroPct").textContent = pct + "%";
-  $("heroSub").textContent = pct === 100 ? "all done — nice work" : "of today's practice";
+  $("heroSub").textContent = past
+    ? "of " + dayLabelText().toLowerCase() + "'s practice"
+    : (pct === 100 ? "all done — nice work" : "of today's practice");
 
-  $("kegBig").innerHTML = (d.reps || 0) + '<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / ' + kegTarget() + '</span>';
-  $("kegSets").textContent = Math.floor((d.reps || 0) / s.reps);
-  document.querySelector("#view-kegels .sub").innerHTML = 'reps today &middot; <span id="kegSets">' + Math.floor((d.reps || 0) / s.reps) + '</span> of ' + s.sets + ' sets done';
+  const td = dayRO(todayKey());
+  $("kegBig").innerHTML = (td.reps || 0) + '<span style="font-size:22px;color:var(--text-muted);font-weight:500"> / ' + kegTarget() + '</span>';
+  $("kegSub").textContent = "reps today · " + Math.floor((td.reps || 0) / s.reps) + " of " + s.sets + " sets done";
   $("protocolText").textContent = s.sets + " sets of " + s.reps + " reps · " + s.hold + "s hold, " + s.rest + "s rest · " + s.amMin + " min yoga in the morning, " + s.pmMin + " min in the evening.";
 
   renderWeek();
@@ -723,55 +790,48 @@ function renderToday() {
 }
 
 function renderWeek() {
-  const wrap = $("week");
-  let h = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center">';
-  const rows = [];
+  let h = '<div class="weekgrid">';
   for (let i = 6; i >= 0; i--) {
-    const dt = addDays(new Date(), -i), k = key(dt), d = dayRO(k);
-    const lab = dt.toLocaleDateString(undefined, { weekday: "narrow" });
-    rows.push({ lab: lab, d: d, isToday: i === 0 });
+    const dt = addDays(new Date(), -i), d = dayRO(key(dt));
+    const kf = Math.min(1, (d.reps || 0) / kegTarget());
+    h += '<button class="weekcol" data-offset="' + i + '" aria-current="' + (i === viewOffset) + '">' +
+      '<span class="wd">' + dt.toLocaleDateString(undefined, { weekday: "narrow" }) + '</span>' +
+      seg(kf, "var(--s1)") + seg(d.am ? 1 : 0, "var(--s2)") + seg(d.pm ? 1 : 0, "var(--s3)") +
+      '</button>';
   }
-  rows.forEach(r => { h += '<div class="muted" style="font-size:11px">' + r.lab + '</div>'; });
-  rows.forEach(r => {
-    const k = Math.min(1, (r.d.reps || 0) / kegTarget());
-    h += '<div style="display:flex;flex-direction:column;gap:3px;align-items:center">' +
-      seg(k, "var(--s1)") + seg(r.d.am ? 1 : 0, "var(--s2)") + seg(r.d.pm ? 1 : 0, "var(--s3)") +
-      '</div>';
-  });
   h += "</div>";
   h += '<div class="legend" style="margin-top:12px;margin-bottom:0">' +
-    '<span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT Reps</span>' +
+    '<span class="li"><span class="swatch" style="background:var(--s1)"></span>PPT</span>' +
     '<span class="li"><span class="swatch" style="background:var(--s2)"></span>AM yoga</span>' +
     '<span class="li"><span class="swatch" style="background:var(--s3)"></span>PM yoga</span></div>';
-  wrap.innerHTML = h;
+  $("week").innerHTML = h;
 }
 function seg(frac, color) {
-  const filled = frac >= 1;
-  const bg = filled ? color : (frac > 0 ? "color-mix(in srgb, " + color + " " + Math.round(frac * 70 + 20) + "%, var(--grid))" : "var(--grid)");
-  return '<div style="width:100%;height:9px;border-radius:3px;background:' + bg + '"></div>';
+  const bg = frac >= 1 ? color
+    : (frac > 0 ? "color-mix(in srgb, " + color + " " + Math.round(frac * 70 + 20) + "%, var(--grid))" : "var(--grid)");
+  return '<span style="display:block;width:100%;height:9px;border-radius:3px;background:' + bg + '"></span>';
 }
 
 /* =====================================================================
-   REMINDER
+   REMINDER — always about TODAY, whatever day is on screen
    ===================================================================== */
 function incompleteParts() {
-  const d = day(), out = [];
+  const d = dayRO(todayKey()), out = [];
   if (!d.am) out.push("morning yoga");
   if ((d.reps || 0) <= 0) out.push("PPT reps");
   if (!d.pm) out.push("evening yoga");
   return out;
 }
 function checkReminder() {
-  const now = new Date(), s = S();
-  const b = $("banner");
-  const d = day();
+  const now = new Date(), s = S(), b = $("banner");
+  const d = dayRO(todayKey());
   const nothingYet = !d.am && !d.pm && (d.reps || 0) === 0;
   const missing = incompleteParts();
 
   if (now.getHours() >= s.remindHour && missing.length) {
     b.classList.add("show");
     b.innerHTML = nothingYet
-      ? "<strong>It's past " + hourLabel(s.remindHour) + "</strong> and nothing's logged yet. Even one set of PPT reps counts."
+      ? "<strong>It's past " + hourLabel(s.remindHour) + "</strong> and nothing's logged today. Even one set of PPT reps counts."
       : "<strong>Still to do today:</strong> " + missing.join(", ") + ".";
   } else {
     b.classList.remove("show");
@@ -797,6 +857,27 @@ function hourLabel(h) { const ampm = h >= 12 ? "PM" : "AM"; const hh = h % 12 ==
 const sess = { open: false, running: false, phase: "ready", rep: 0, total: 20, tEnd: 0, remain: 0, raf: 0, counted: 0, manual: false, lastFrac: 0 };
 const CIRC = 2 * Math.PI * 88;
 
+/* The ring carries the phase three ways at once, so a half-second glance is enough:
+   HOLD — strong colour, thick stroke, winding clockwise (filling up)
+   REST — pale colour, thin stroke, unwinding (draining away)
+   Both survive discreet mode, where the palette drops to two greys. */
+const PHASE_STYLE = {
+  hold: { normal: "var(--s1)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 },
+  rest: { normal: "var(--s3)", quiet: "color-mix(in srgb, var(--text-muted) 34%, transparent)", w: 3.5 },
+  done: { normal: "var(--good)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 }
+};
+function paint(frac, phase) {
+  const c = $("ringProg");
+  const quiet = $("session").classList.contains("discreet");
+  if (phase && PHASE_STYLE[phase]) {
+    const st = PHASE_STYLE[phase];
+    c.setAttribute("stroke", quiet ? st.quiet : st.normal);
+    c.setAttribute("stroke-width", st.w);
+  }
+  const shown = phase === "rest" ? 1 - frac : frac;
+  c.setAttribute("stroke-dashoffset", (CIRC * (1 - Math.min(1, Math.max(0, shown)))).toFixed(1));
+}
+
 function openSession(total, manual) {
   sess.open = true; sess.running = false; sess.phase = "ready";
   sess.rep = 0; sess.total = total; sess.counted = 0; sess.manual = !!manual;
@@ -814,7 +895,7 @@ function openSession(total, manual) {
   $("sessCount").textContent = manual ? "0" : S().hold;
   $("sessRep").textContent = manual ? "of " + total + " reps" : "rep 1 of " + total;
   keepAwake(true);
-  if (S().cue === "sound" || S().cue === "both") { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume(); } catch (e) {} }
+  unlockAudio();
 }
 function closeSession() {
   commitReps();
@@ -822,11 +903,11 @@ function closeSession() {
   cancelAnimationFrame(sess.raf);
   $("session").classList.remove("open");
   keepAwake(false);
-  renderToday(); renderHistory();
+  renderAll();
 }
 function commitReps() {
   if (sess.counted > 0) {
-    const d = day();
+    const d = day(todayKey());
     d.reps = (d.reps || 0) + sess.counted;
     d.log.push({ t: Date.now(), reps: sess.counted });
     save();
@@ -845,28 +926,6 @@ function updatePips() {
     nodes[i].className = "pip" + (i < sess.counted ? " on" : (i === sess.counted && sess.running ? " now" : ""));
   }
 }
-/* The ring carries the phase three ways at once, so a half-second glance is enough:
-   SQUEEZE — strong colour, thick stroke, winding clockwise (filling up)
-   RELEASE — pale colour, thin stroke, unwinding (draining away)
-   Both survive discreet mode, where the palette drops to two greys. */
-const PHASE_STYLE = {
-  hold:    { normal: "var(--s1)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 },
-  rest:    { normal: "var(--s3)", quiet: "color-mix(in srgb, var(--text-muted) 34%, transparent)", w: 3.5 },
-  done:    { normal: "var(--good)", quiet: "color-mix(in srgb, var(--text-muted) 78%, transparent)", w: 8 }
-};
-function paint(frac, phase) {
-  const c = $("ringProg");
-  const quiet = $("session").classList.contains("discreet");
-  if (phase && PHASE_STYLE[phase]) {
-    const st = PHASE_STYLE[phase];
-    c.setAttribute("stroke", quiet ? st.quiet : st.normal);
-    c.setAttribute("stroke-width", st.w);
-  }
-  // release drains instead of filling — direction alone tells you the phase
-  const shown = phase === "rest" ? 1 - frac : frac;
-  c.setAttribute("stroke-dashoffset", (CIRC * (1 - Math.min(1, Math.max(0, shown)))).toFixed(1));
-}
-
 function startPhase(phase) {
   const s = S();
   sess.phase = phase;
@@ -878,13 +937,11 @@ function startPhase(phase) {
   $("sessRep").textContent = "rep " + Math.min(sess.total, sess.counted + 1) + " of " + sess.total;
   updatePips();
 }
-
 function tick() {
   if (!sess.running) return;
   const s = S();
-  const now = performance.now();
   const dur = (sess.phase === "hold" ? s.hold : s.rest) * 1000;
-  const left = sess.tEnd - now;
+  const left = sess.tEnd - performance.now();
   const frac = 1 - Math.max(0, left) / dur;
   sess.lastFrac = frac;
   paint(frac, sess.phase);
@@ -902,7 +959,6 @@ function tick() {
   }
   sess.raf = requestAnimationFrame(tick);
 }
-
 function finishSet() {
   sess.running = false;
   cancelAnimationFrame(sess.raf);
@@ -916,7 +972,7 @@ function finishSet() {
   $("session").classList.remove("discreet");
   $("sessDiscreet").textContent = "Discreet";
   commitReps();
-  renderToday();
+  renderAll();
 }
 
 $("sessMain").addEventListener("click", e => {
@@ -986,7 +1042,7 @@ $("sessExit").addEventListener("click", e => { e.stopPropagation(); closeSession
 $("sessFinish").addEventListener("click", e => { e.stopPropagation(); sess.running = false; cancelAnimationFrame(sess.raf); closeSession(); });
 
 /* =====================================================================
-   YOGA TIMER
+   YOGA TIMER — only ever runs for today
    ===================================================================== */
 const yg = { which: "am", running: false, total: 300, left: 300, tEnd: 0, iv: 0 };
 function openYoga(which) {
@@ -1001,14 +1057,14 @@ function openYoga(which) {
 }
 function closeYoga(markDone) {
   clearInterval(yg.iv); yg.running = false;
-  const d = day();
+  const d = day(todayKey());
   const elapsed = Math.round(yg.total - yg.left);
-  if (yg.which === "am") { d.amSec = Math.max(d.amSec || 0, elapsed); if (markDone) d.am = true; }
-  else { d.pmSec = Math.max(d.pmSec || 0, elapsed); if (markDone) d.pm = true; }
+  if (yg.which === "am") { d.amSec = Math.max(d.amSec || 0, elapsed); if (markDone) { d.am = true; d.log.push({ t: Date.now(), am: true }); } }
+  else { d.pmSec = Math.max(d.pmSec || 0, elapsed); if (markDone) { d.pm = true; d.log.push({ t: Date.now(), pm: true }); } }
   save();
   $("yogaTimer").classList.remove("open");
   keepAwake(false);
-  renderToday(); renderHistory();
+  renderAll();
   if (markDone) toast(yg.which === "am" ? "Morning yoga logged" : "Evening yoga logged");
 }
 $("yMain").addEventListener("click", () => {
@@ -1032,9 +1088,6 @@ $("yExit").addEventListener("click", () => closeYoga(false));
    ===================================================================== */
 function allKeys() { return Object.keys(db.days).sort(); }
 
-/* A streak is any run of consecutive days where `test` passes.
-   Today is never counted as a break until the day is actually over — so an
-   unfinished morning doesn't wipe out three weeks of work at 9am. */
 function streakFor(test) {
   let best = 0, run = 0;
   const start = allKeys()[0];
@@ -1051,7 +1104,6 @@ function streakFor(test) {
   while (test(dayRO(key(x))) && guard2++ < 4000) { cur++; x = addDays(x, -1); }
   return { cur: cur, best: Math.max(best, cur) };
 }
-
 const TESTS = {
   all: d => dayScore(d) >= 0.999,
   keg: d => (d.reps || 0) >= kegTarget(),
@@ -1066,13 +1118,14 @@ function renderHistory() {
   $("stBest").textContent = st.best;
 
   let sum = 0, n = 0;
-  for (let i = 29; i >= 0; i--) { const k = key(addDays(new Date(), -i)); sum += dayScore(dayRO(k)); n++; }
+  for (let i = 29; i >= 0; i--) { sum += dayScore(dayRO(key(addDays(new Date(), -i)))); n++; }
   $("stRate").textContent = Math.round((sum / n) * 100) + "%";
 
   renderExStreaks();
   renderHeat();
   renderTrend();
   renderTotals();
+  if ($("tableWrap").style.display === "block") buildTable();
 }
 
 function renderExStreaks() {
@@ -1084,11 +1137,10 @@ function renderExStreaks() {
   let h = "";
   rows.forEach(r => {
     const s = streakFor(TESTS[r.k]);
-    const live = s.cur > 0;
     h += '<div class="exstreak">' +
       '<span class="swatch" style="background:' + r.color + '"></span>' +
       '<span class="nm">' + r.name + '<span class="goal">' + r.goal + '</span></span>' +
-      '<span class="cur"' + (live ? '' : ' style="color:var(--text-muted)"') + '>' + s.cur + '<span class="unit">' + (s.cur === 1 ? "day" : "days") + '</span></span>' +
+      '<span class="cur"' + (s.cur > 0 ? '' : ' style="color:var(--text-muted)"') + '>' + s.cur + '<span class="unit">' + (s.cur === 1 ? "day" : "days") + '</span></span>' +
       '<span class="best">best ' + s.best + '</span>' +
       '</div>';
   });
@@ -1100,17 +1152,15 @@ function renderHeat() {
   const end = new Date();
   const endDow = end.getDay();
   const start = addDays(end, -(weeks * 7 - 1 + (6 - endDow)));
-  const wrap = $("heat");
   const firstKey = allKeys()[0];
   const firstDay = firstKey ? parseKey(firstKey) : end;
   let h = "", labels = "";
-  let d = new Date(start);
-  d = addDays(d, -d.getDay()); // align to Sunday
+  let d = addDays(new Date(start), -new Date(start).getDay());
   let cols = 0, lastMonth = -1;
   while (d <= end) {
     for (let r = 0; r < 7; r++) {
       const cur = addDays(d, r);
-      let bg = "transparent", title = "";
+      let bg = "transparent", title = "", off = "";
       if (cur <= end && cur >= firstDay) {
         const sc = dayScore(dayRO(key(cur)));
         const lvl = sc <= 0 ? 0 : sc < 0.34 ? 1 : sc < 0.67 ? 2 : sc < 0.999 ? 3 : 4;
@@ -1119,14 +1169,18 @@ function renderHeat() {
       } else if (cur <= end) {
         bg = "color-mix(in srgb, var(--heat-0) 45%, transparent)";
       }
-      h += '<div class="cell" style="background:' + bg + '" title="' + title + '"></div>';
+      if (cur <= end) {
+        const back = Math.round((new Date(key(end)) - new Date(key(cur))) / 86400000);
+        if (back >= 0 && back <= MAX_BACK) off = ' data-offset="' + back + '"';
+      }
+      h += '<div class="cell"' + off + ' style="background:' + bg + '" title="' + title + '"></div>';
     }
     const m = d.getMonth();
     labels += '<div>' + (m !== lastMonth && d >= addDays(firstDay, -7) ? d.toLocaleDateString(undefined, { month: "short" }) : "") + '</div>';
     lastMonth = m;
     d = addDays(d, 7); cols++;
   }
-  wrap.innerHTML = h;
+  $("heat").innerHTML = h;
   const lab = $("heatLabels");
   lab.style.display = "grid";
   lab.style.gridTemplateColumns = "repeat(" + cols + ", 1fr)";
@@ -1138,7 +1192,6 @@ function seriesData(days) {
   const out = [];
   for (let i = days - 1; i >= 0; i--) {
     const dt = addDays(new Date(), -i);
-    const k = key(dt);
     let kg = 0, am = 0, pm = 0;
     for (let w = 0; w < 7; w++) {
       const dd = dayRO(key(addDays(dt, -w)));
@@ -1146,7 +1199,7 @@ function seriesData(days) {
       am += dd.am ? 1 : 0;
       pm += dd.pm ? 1 : 0;
     }
-    out.push({ k: k, dt: dt, kg: kg / 7, am: am / 7, pm: pm / 7 });
+    out.push({ k: key(dt), dt: dt, kg: kg / 7, am: am / 7, pm: pm / 7 });
   }
   return out;
 }
@@ -1170,9 +1223,9 @@ function renderTrend() {
   s += '</g>';
 
   const series = [
-    { key: "kg", color: "var(--s1)", label: "PPT" },
-    { key: "am", color: "var(--s2)", label: "AM" },
-    { key: "pm", color: "var(--s3)", label: "PM" }
+    { key: "kg", color: "var(--s1)" },
+    { key: "am", color: "var(--s2)" },
+    { key: "pm", color: "var(--s3)" }
   ];
   const last = data[data.length - 1];
   series.forEach(se => {
@@ -1181,9 +1234,7 @@ function renderTrend() {
     s += '<path d="' + dstr + '" fill="none" stroke="' + se.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
     s += '<circle cx="' + x(data.length - 1).toFixed(1) + '" cy="' + y(last[se.key]).toFixed(1) + '" r="3.5" fill="' + se.color + '" stroke="var(--surface-1)" stroke-width="2"/>';
   });
-  // end labels, nudged apart so they never overlap
-  const labels = series.map(se => ({ color: se.color, v: last[se.key], y: y(last[se.key]) }))
-    .sort((a, b) => a.y - b.y);
+  const labels = series.map(se => ({ color: se.color, v: last[se.key], y: y(last[se.key]) })).sort((a, b) => a.y - b.y);
   for (let i = 1; i < labels.length; i++) {
     if (labels[i].y - labels[i - 1].y < 12) labels[i].y = labels[i - 1].y + 12;
   }
@@ -1211,8 +1262,7 @@ function trendHover(evt) {
   const r = svg.getBoundingClientRect();
   const cx = (evt.touches ? evt.touches[0].clientX : evt.clientX) - r.left;
   const scale = g.W / r.width;
-  const px = cx * scale;
-  let i = Math.round(((px - g.pad.l) / (g.W - g.pad.l - g.pad.r)) * (g.n - 1));
+  let i = Math.round((((cx * scale) - g.pad.l) / (g.W - g.pad.l - g.pad.r)) * (g.n - 1));
   i = Math.max(0, Math.min(g.n - 1, i));
   const p = trendPts[i];
   const line = document.getElementById("cross");
@@ -1221,8 +1271,8 @@ function trendHover(evt) {
   tt.innerHTML = "<strong>" + p.dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + "</strong><br>" +
     "PPT " + Math.round(p.kg * 100) + "% · AM " + Math.round(p.am * 100) + "% · PM " + Math.round(p.pm * 100) + "%";
   tt.classList.add("show");
-  const left = Math.max(0, Math.min(r.width - 170, (g.x(i) / scale) - 85));
-  tt.style.left = left + "px"; tt.style.top = "2px";
+  tt.style.left = Math.max(0, Math.min(r.width - 170, (g.x(i) / scale) - 85)) + "px";
+  tt.style.top = "2px";
 }
 $("trend").addEventListener("mousemove", trendHover);
 $("trend").addEventListener("touchstart", trendHover, { passive: true });
@@ -1242,19 +1292,24 @@ function renderTotals() {
     "<div class='field'><span>Days tracked</span><strong>" + ks.length + "</strong></div>";
 }
 
-$("btn-table").addEventListener("click", () => {
-  const w = $("tableWrap");
-  const showing = w.style.display === "block";
-  if (showing) { w.style.display = "none"; $("btn-table").textContent = "Show data table"; return; }
-  let h = '<table class="data"><thead><tr><th>Date</th><th>PPT</th><th>AM</th><th>PM</th></tr></thead><tbody>';
+function buildTable() {
+  let h = '<table class="data"><thead><tr><th>Date</th><th>PPT</th><th>AM</th><th>PM</th><th></th></tr></thead><tbody>';
   const ks = allKeys().slice().reverse();
-  if (!ks.length) h += '<tr><td colspan="4" class="muted">No data yet.</td></tr>';
+  if (!ks.length) h += '<tr><td colspan="5" class="muted">No data yet.</td></tr>';
   ks.forEach(k => {
     const d = db.days[k];
-    h += "<tr><td>" + k + "</td><td>" + (d.reps || 0) + "</td><td>" + (d.am ? "✓" : "—") + "</td><td>" + (d.pm ? "✓" : "—") + "</td></tr>";
+    const back = Math.round((new Date(todayKey()) - parseKey(k)) / 86400000);
+    const canEdit = back >= 0 && back <= MAX_BACK;
+    h += "<tr><td>" + k + "</td><td>" + (d.reps || 0) + "</td><td>" + (d.am ? "✓" : "—") + "</td><td>" + (d.pm ? "✓" : "—") + "</td>" +
+      '<td class="edit">' + (canEdit ? '<button class="rowedit" data-offset="' + back + '">edit</button>' : "") + "</td></tr>";
   });
   h += "</tbody></table>";
-  w.innerHTML = h; w.style.display = "block";
+  $("tableWrap").innerHTML = h;
+}
+$("btn-table").addEventListener("click", () => {
+  const w = $("tableWrap");
+  if (w.style.display === "block") { w.style.display = "none"; $("btn-table").textContent = "Show data table"; return; }
+  buildTable(); w.style.display = "block";
   $("btn-table").textContent = "Hide data table";
 });
 
@@ -1266,9 +1321,9 @@ function bindNum(id, prop) {
   el.value = S()[prop];
   el.addEventListener("change", () => {
     let v = parseInt(el.value, 10);
-    if (isNaN(v) || v < 1) v = DEFAULTS.settings[prop];
-    if (prop === "remindHour") { v = Math.max(0, Math.min(23, parseInt(el.value, 10) || 15)); }
-    S()[prop] = v; el.value = v; save(); renderToday(); renderHistory();
+    if (prop === "remindHour") { v = Math.max(0, Math.min(23, isNaN(v) ? 15 : v)); }
+    else if (isNaN(v) || v < 1) { v = DEFAULTS.settings[prop]; }
+    S()[prop] = v; el.value = v; save(); renderAll();
   });
 }
 function initSettings() {
@@ -1287,7 +1342,7 @@ function initSettings() {
   const th = $("s-theme"); th.value = S().theme;
   th.addEventListener("change", () => { S().theme = th.value; save(); applyTheme(); });
 
-  $("btn-testcue").addEventListener("click", () => { cueSqueeze(); setTimeout(cueRelease, 700); toast("Cue sent"); });
+  $("btn-testcue").addEventListener("click", () => { unlockAudio(); cueSqueeze(); setTimeout(cueRelease, 700); toast("Cue sent"); });
 
   updateNotifState();
   $("btn-notif").addEventListener("click", async () => {
@@ -1301,15 +1356,11 @@ function initSettings() {
     : "History is saved on this device only — nothing leaves your phone. Export a backup now and then, or before switching phones.";
 }
 function updateCueDesc() {
-  $("cueDesc").textContent = HAS_VIBRATE
-    ? "Vibration works on this phone"
-    : "This phone can't vibrate from a web app";
+  $("cueDesc").textContent = HAS_VIBRATE ? "Vibration works on this phone" : "This phone can't vibrate from a web app";
   const w = $("cueWarn"), usingVib = S().cue === "vibrate" || S().cue === "both";
   if (!HAS_VIBRATE && usingVib) {
     w.classList.add("show");
     w.innerHTML = "<strong>Vibration won't fire on this phone.</strong> iPhones don't give web apps access to the vibration motor — no browser can do it. Choose the soft blip and wear one earbud instead.";
-  } else if (!HAS_VIBRATE && S().cue === "sound") {
-    w.classList.remove("show");
   } else {
     w.classList.remove("show");
   }
@@ -1344,7 +1395,7 @@ $("fileIn").addEventListener("change", e => {
       if (!obj || typeof obj !== "object" || !obj.days) throw new Error("bad file");
       db = Object.assign({}, DEFAULTS, obj);
       db.settings = Object.assign({}, DEFAULTS.settings, obj.settings || {});
-      save(); initSettings(); applyTheme(); renderToday(); renderHistory();
+      save(); initSettings(); applyTheme(); renderAll();
       toast("Backup restored");
     } catch (err) { toast("Couldn't read that file"); }
   };
@@ -1354,49 +1405,93 @@ $("fileIn").addEventListener("change", e => {
 /* =====================================================================
    WIRING
    ===================================================================== */
+function showView(name) {
+  document.querySelectorAll("nav.tabs .t").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === name)));
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $("view-" + name).classList.add("active");
+  window.scrollTo(0, 0);
+}
 document.querySelectorAll("nav.tabs .t").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll("nav.tabs .t").forEach(b => b.setAttribute("aria-selected", "false"));
-    btn.setAttribute("aria-selected", "true");
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    $("view-" + btn.dataset.view).classList.add("active");
-    window.scrollTo(0, 0);
+    showView(btn.dataset.view);
     if (btn.dataset.view === "history") renderHistory();
   });
 });
 
-$("btn-am").addEventListener("click", () => { if (day().am) { day().am = false; save(); renderToday(); toast("Morning yoga un-marked"); } else openYoga("am"); });
-$("btn-pm").addEventListener("click", () => { if (day().pm) { day().pm = false; save(); renderToday(); toast("Evening yoga un-marked"); } else openYoga("pm"); });
-$("btn-keg").addEventListener("click", () => openSession(S().reps, false));
+/* --- day navigation --- */
+$("dayPrev").addEventListener("click", () => { viewOffset = Math.min(MAX_BACK, viewOffset + 1); renderToday(); });
+$("dayNext").addEventListener("click", () => { viewOffset = Math.max(0, viewOffset - 1); renderToday(); });
+$("dayLabel").addEventListener("click", () => { viewOffset = 0; renderToday(); });
+$("week").addEventListener("click", e => {
+  const c = e.target.closest("[data-offset]");
+  if (c) { viewOffset = +c.dataset.offset; renderToday(); }
+});
+$("heat").addEventListener("click", e => {
+  const c = e.target.closest("[data-offset]");
+  if (c) goToDay(+c.dataset.offset);
+});
+$("tableWrap").addEventListener("click", e => {
+  const c = e.target.closest("[data-offset]");
+  if (c) goToDay(+c.dataset.offset);
+});
+
+/* --- logging, always against the selected day --- */
+function logYoga(which) {
+  const k = viewKey(), d = day(k);
+  const field = which === "am" ? "am" : "pm";
+  if (d[field]) {
+    d[field] = false; save(); renderAll();
+    toast((which === "am" ? "Morning" : "Evening") + " yoga un-marked" + (isToday() ? "" : " for " + dayLabelText().toLowerCase()));
+    return;
+  }
+  if (isToday()) { openYoga(which); return; }
+  d[field] = true;
+  d.log.push({ t: Date.now(), am: which === "am", pm: which === "pm" });
+  save(); renderAll();
+  toast((which === "am" ? "Morning" : "Evening") + " yoga logged for " + dayLabelText().toLowerCase());
+}
+$("btn-am").addEventListener("click", () => logYoga("am"));
+$("btn-pm").addEventListener("click", () => logYoga("pm"));
+$("btn-keg").addEventListener("click", () => {
+  if (isToday()) { openSession(S().reps, false); return; }
+  addSetTo(viewKey());
+});
+function addSetTo(k) {
+  const d = day(k);
+  d.reps = (d.reps || 0) + S().reps;
+  d.log.push({ t: Date.now(), reps: S().reps });
+  save(); renderAll();
+  toast("+" + S().reps + " reps on " + dayLabelText().toLowerCase());
+}
+
 $("btn-start-session").addEventListener("click", () => openSession(S().reps, false));
 $("btn-short").addEventListener("click", () => openSession(Math.max(1, Math.round(S().reps / 2)), false));
 $("btn-manual").addEventListener("click", () => openSession(S().reps, true));
 
 document.querySelectorAll("[data-quick]").forEach(b => {
   b.addEventListener("click", () => {
-    const d = day(), what = b.dataset.quick;
-    if (what === "am") { d.am = true; d.log.push({ t: Date.now(), am: true }); toast("Morning yoga logged"); }
-    else if (what === "pm") { d.pm = true; d.log.push({ t: Date.now(), pm: true }); toast("Evening yoga logged"); }
-    else if (what === "set") { d.reps = (d.reps || 0) + S().reps; d.log.push({ t: Date.now(), reps: S().reps }); toast("Set of " + S().reps + " logged"); }
+    const k = viewKey(), d = day(k), what = b.dataset.quick;
+    const when = isToday() ? "" : " for " + dayLabelText().toLowerCase();
+    if (what === "am") { d.am = true; d.log.push({ t: Date.now(), am: true }); toast("Morning yoga logged" + when); }
+    else if (what === "pm") { d.pm = true; d.log.push({ t: Date.now(), pm: true }); toast("Evening yoga logged" + when); }
+    else if (what === "set") { d.reps = (d.reps || 0) + S().reps; d.log.push({ t: Date.now(), reps: S().reps }); toast("Set of " + S().reps + " logged" + when); }
     else if (what === "undo") {
       const last = d.log.pop();
-      if (!last) { toast("Nothing to undo"); return; }
+      if (!last) { toast("Nothing to undo on " + dayLabelText().toLowerCase()); return; }
       if (last.reps) d.reps = Math.max(0, (d.reps || 0) - last.reps);
       if (last.am) d.am = false;
       if (last.pm) d.pm = false;
-      toast("Undone");
+      toast("Undone" + when);
     }
-    save(); renderToday(); renderHistory();
+    save(); renderAll();
   });
 });
 
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) { renderToday(); renderHistory(); }
-});
+document.addEventListener("visibilitychange", () => { if (!document.hidden) renderAll(); });
 window.addEventListener("resize", () => { if ($("view-history").classList.contains("active")) renderTrend(); });
 
 /* Offline: cache the app on the phone so it opens with no signal.
-   Needs sw.js sitting next to index.html, and an https address (file:// can't). */
+   Needs sw.js sitting next to index.html, and an https address. */
 function setOfflineState(txt) { const el = $("offlineState"); if (el) el.textContent = txt; }
 if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
   navigator.serviceWorker.register("sw.js")
@@ -1412,9 +1507,8 @@ if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
 
 applyTheme();
 initSettings();
-renderToday();
-renderHistory();
-setInterval(checkReminder, 60000);
+renderAll();
+setInterval(() => { checkReminder(); }, 60000);
 </script>
 </body>
 </html>
